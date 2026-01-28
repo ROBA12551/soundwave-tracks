@@ -46,8 +46,12 @@ exports.handler = async (event) => {
 async function handleGetProfile(event, headers) {
     try {
         const username = event.queryStringParameters?.username;
+        
+        console.log('=== GET Profile Request ===');
+        console.log('Username:', username);
 
         if (!username) {
+            console.error('No username provided');
             return {
                 statusCode: 400,
                 headers,
@@ -58,8 +62,14 @@ async function handleGetProfile(event, headers) {
             };
         }
 
+        // ★ 環境変数をチェック
+        console.log('Checking env vars:');
+        console.log('  GITHUB_TOKEN:', GITHUB_TOKEN ? '✅ set' : '❌ missing');
+        console.log('  GITHUB_OWNER:', GITHUB_OWNER);
+        console.log('  GITHUB_REPO:', GITHUB_REPO);
+
         if (!GITHUB_TOKEN) {
-            console.error('No GITHUB_TOKEN');
+            console.error('No GITHUB_TOKEN configured');
             return {
                 statusCode: 500,
                 headers,
@@ -74,14 +84,28 @@ async function handleGetProfile(event, headers) {
         const filePath = `profiles/${username}.json`;
         const url = `${GITHUB_API}/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}`;
 
-        console.log('Fetching from:', url);
+        console.log('Fetching from GitHub:');
+        console.log('  URL:', url);
 
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`,
-                'Accept': 'application/vnd.github.v3+json'
-            }
-        });
+        let response;
+        try {
+            response = await fetch(url, {
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+        } catch (fetchError) {
+            console.error('Fetch error:', fetchError.message);
+            return {
+                statusCode: 500,
+                headers,
+                body: JSON.stringify({
+                    success: false,
+                    error: 'Failed to fetch from GitHub: ' + fetchError.message
+                })
+            };
+        }
 
         console.log('GitHub response status:', response.status);
 
@@ -115,17 +139,46 @@ async function handleGetProfile(event, headers) {
                 headers,
                 body: JSON.stringify({
                     success: false,
-                    error: 'Failed to fetch profile'
+                    error: 'Failed to fetch profile: ' + response.status
                 })
             };
         }
 
-        const fileData = await response.json();
-        const profileJson = JSON.parse(
-            Buffer.from(fileData.content, 'base64').toString('utf-8')
-        );
+        // ★ レスポンスをパース
+        let fileData;
+        try {
+            fileData = await response.json();
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError.message);
+            return {
+                statusCode: 500,
+                headers,
+                body: JSON.stringify({
+                    success: false,
+                    error: 'Failed to parse GitHub response'
+                })
+            };
+        }
 
-        console.log('✅ Loaded profile:', profileJson.name);
+        console.log('✅ File data received from GitHub');
+
+        // ★ Base64 をデコード
+        let profileJson;
+        try {
+            const content = Buffer.from(fileData.content, 'base64').toString('utf-8');
+            profileJson = JSON.parse(content);
+            console.log('✅ Profile decoded:', profileJson.name);
+        } catch (decodeError) {
+            console.error('Decode/parse error:', decodeError.message);
+            return {
+                statusCode: 500,
+                headers,
+                body: JSON.stringify({
+                    success: false,
+                    error: 'Failed to decode profile'
+                })
+            };
+        }
 
         return {
             statusCode: 200,
@@ -138,13 +191,13 @@ async function handleGetProfile(event, headers) {
         };
 
     } catch (error) {
-        console.error('Get profile error:', error.message);
+        console.error('Get profile error:', error.message, error.stack);
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({
                 success: false,
-                error: error.message
+                error: 'Internal server error: ' + error.message
             })
         };
     }

@@ -14,7 +14,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Loading profile page...');
     
     loadUserFromStorage();
-    loadAllTracks();
+    
+    // ★ トラックを読み込むまで待機
+    await loadAllTracks();
+    console.log('✅ Tracks loaded, now loading profile...');
+    
     loadProfileFromGitHub();
     setupEventListeners();
     updateUIForUser();
@@ -38,13 +42,29 @@ async function loadAllTracks() {
         console.log('📥 Loading tracks...');
         const response = await fetch(`${API_BASE}/tracks`);
         
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        console.log('Track API response status:', response.status);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText.substring(0, 100)}`);
+        }
         
         const data = await response.json();
-        allTracks = Array.isArray(data.tracks) ? data.tracks : [];
+        console.log('Track API response data:', data);
+        
+        allTracks = Array.isArray(data.tracks) ? data.tracks : (Array.isArray(data) ? data : []);
         console.log(`✅ Loaded ${allTracks.length} tracks`);
+        
+        // ★ 読み込まれたトラック情報を表示（デバッグ用）
+        if (allTracks.length > 0) {
+            console.log('First 3 tracks:');
+            allTracks.slice(0, 3).forEach(t => {
+                console.log(`  - ${t.title} by ${t.artist}`);
+            });
+        }
     } catch (e) {
-        console.error('❌ Error loading tracks:', e);
+        console.error('❌ Error loading tracks:', e.message);
+        allTracks = [];
     }
 }
 
@@ -156,6 +176,26 @@ function displayProfile() {
     const totalPlays = userTracks.reduce((sum, t) => sum + (t.plays || 0), 0);
     const totalLikes = userTracks.reduce((sum, t) => sum + (t.likes || 0), 0);
 
+    console.log('🎵 Track Information:');
+    console.log('  Profile Name:', profileData.name);
+    console.log('  Total allTracks:', allTracks.length);
+    console.log('  Matching userTracks:', userTracks.length);
+    console.log('  Sample tracks (first 3):');
+    
+    // ★ allTracks の最初の3つを表示（デバッグ用）
+    allTracks.slice(0, 3).forEach(t => {
+        console.log(`    - ${t.title} (artist: ${t.artist})`);
+    });
+    
+    // ★ アーティスト名の完全一致をチェック
+    if (allTracks.length > 0) {
+        const artists = [...new Set(allTracks.map(t => t.artist))];
+        console.log('  All unique artists:', artists);
+        
+        const nameMatches = artists.filter(a => a === profileData.name);
+        console.log('  Exact matches with profile name:', nameMatches);
+    }
+
     // ★ 統計情報は最初のロード時だけ表示
     // 再生中に自動で変わるのを防ぐ
     const cachedStatsKey = STORAGE_PREFIX + 'profileStats';
@@ -202,11 +242,18 @@ function displayProfile() {
 function displayUserTracks(tracks) {
     const grid = document.getElementById('tracksGrid');
     
+    console.log('🎵 displayUserTracks() called');
+    console.log('  Tracks count:', tracks.length);
+    console.log('  Grid element found:', !!grid);
+    
     if (tracks.length === 0) {
+        console.log('⏭️ No tracks to display');
         grid.innerHTML = '<p style="color: var(--text-secondary);">No tracks yet</p>';
         return;
     }
 
+    console.log('✅ Displaying', tracks.length, 'tracks');
+    
     let html = '';
     tracks.forEach(track => {
         html += `
@@ -223,6 +270,7 @@ function displayUserTracks(tracks) {
     });
 
     grid.innerHTML = html;
+    console.log('✅ Tracks HTML rendered');
 }
 
 // ===== PROFILE DATA MANAGEMENT =====
@@ -581,7 +629,7 @@ window.refreshProfileStats = function() {
     alert('✅ Statistics updated!');
 };
 
-// ★ デバッグ用：localStorage のプロフィール情報を表示
+// ★ デバッグ用：プロフィール＆トラック情報を表示
 window.debugProfile = function() {
     console.log('=== DEBUG PROFILE ===');
     
@@ -594,7 +642,6 @@ window.debugProfile = function() {
             console.log('  Name:', profile.name);
             console.log('  AvatarLetter:', profile.avatarLetter);
             console.log('  AvatarUrl length:', profile.avatarUrl ? profile.avatarUrl.length : 0);
-            console.log('  AvatarUrl start:', profile.avatarUrl ? profile.avatarUrl.substring(0, 50) + '...' : 'N/A');
         } catch (e) {
             console.error('❌ Error parsing profile:', e);
         }
@@ -617,8 +664,44 @@ window.debugProfile = function() {
     if (base64Input) {
         console.log('✅ avatarBase64 input:');
         console.log('  Value length:', base64Input.value ? base64Input.value.length : 0);
-        console.log('  Value start:', base64Input.value ? base64Input.value.substring(0, 50) + '...' : 'N/A');
     }
     
-    console.log('=== END DEBUG ===');
+    console.log('=== END DEBUG PROFILE ===');
+};
+
+// ★ デバッグ用：トラック情報を表示
+window.debugTracks = function() {
+    console.log('=== DEBUG TRACKS ===');
+    console.log('Total allTracks:', allTracks.length);
+    
+    if (allTracks.length === 0) {
+        console.warn('⚠️ No tracks loaded');
+    } else {
+        console.log('✅ First 5 tracks:');
+        allTracks.slice(0, 5).forEach(t => {
+            console.log(`  - "${t.title}" by "${t.artist}" (ID: ${t.id})`);
+        });
+        
+        console.log('✅ Unique artists:');
+        const artists = [...new Set(allTracks.map(t => t.artist))];
+        artists.slice(0, 10).forEach(a => {
+            const count = allTracks.filter(t => t.artist === a).length;
+            console.log(`  - ${a} (${count} tracks)`);
+        });
+    }
+    
+    if (userProfile) {
+        const userTracks = allTracks.filter(t => t.artist === userProfile.name);
+        console.log('\n✅ Tracks for current profile:');
+        console.log('  Profile name:', userProfile.name);
+        console.log('  Matching tracks:', userTracks.length);
+        if (userTracks.length > 0) {
+            console.log('  First 3 tracks:');
+            userTracks.slice(0, 3).forEach(t => {
+                console.log(`    - "${t.title}" (${t.plays || 0} plays)`);
+            });
+        }
+    }
+    
+    console.log('=== END DEBUG TRACKS ===');
 };
