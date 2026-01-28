@@ -64,8 +64,22 @@ async function loadProfileFromGitHub() {
         
         const data = await response.json();
         if (data.success && data.profile) {
-            userProfile = data.profile;
-            console.log('✅ Profile loaded from GitHub:', data.profile.name);
+            // ★ デフォルト値とマージして、すべてのプロパティが存在することを確認
+            userProfile = {
+                name: data.profile.name || currentUser.username,
+                email: data.profile.email || currentUser.email,
+                location: data.profile.location || '🇯🇵 Japan',
+                bio: data.profile.bio || 'Music artist on BeatWave',
+                avatarLetter: data.profile.avatarLetter || currentUser.username?.charAt(0).toUpperCase() || 'U',
+                avatarUrl: data.profile.avatarUrl || '',
+                verified: data.profile.verified || false,
+                followers: data.profile.followers || 0,
+                createdAt: data.profile.createdAt || new Date().toISOString(),
+                updatedAt: data.profile.updatedAt || new Date().toISOString(),
+                sha: data.sha  // GitHub の SHA（更新時に必要）
+            };
+            
+            console.log('✅ Profile loaded from GitHub:', userProfile.name);
             
             // ★ localStorage にキャッシュ
             localStorage.setItem(STORAGE_PREFIX + 'profileData', JSON.stringify(userProfile));
@@ -163,11 +177,11 @@ function displayUserTracks(tracks) {
 function loadProfileData() {
     if (currentUser) {
         return {
-            name: currentUser.username,
-            email: currentUser.email,
+            name: currentUser.username || '',
+            email: currentUser.email || '',
             location: '🇯🇵 Japan',
             bio: 'Music artist on BeatWave',
-            avatarLetter: currentUser.username.charAt(0).toUpperCase(),
+            avatarLetter: currentUser.username?.charAt(0).toUpperCase() || 'U',
             avatarUrl: '',
             verified: false,
             followers: 0,
@@ -197,10 +211,11 @@ function openEditModal() {
 
     const profileData = userProfile || loadProfileData();
 
-    document.getElementById('editName').value = profileData.name;
-    document.getElementById('editLocation').value = profileData.location.replace('🇯🇵 ', '').replace('🌍 ', '');
-    document.getElementById('editBio').value = profileData.bio;
-    document.getElementById('editAvatarLetter').value = profileData.avatarLetter;
+    document.getElementById('editName').value = profileData.name || '';
+    // ★ location が undefined の場合のチェック
+    document.getElementById('editLocation').value = (profileData.location || '').replace('🇯🇵 ', '').replace('🌍 ', '');
+    document.getElementById('editBio').value = profileData.bio || '';
+    document.getElementById('editAvatarLetter').value = profileData.avatarLetter || '';
 
     document.getElementById('editModal').classList.add('active');
 }
