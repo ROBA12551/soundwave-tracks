@@ -1,4 +1,4 @@
-// Netlify Function: Get and Save tracks
+// Netlify Function: Save and Get profile
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_REPO = process.env.GITHUB_REPO || 'soundwave-tracks';
@@ -6,7 +6,7 @@ const GITHUB_OWNER = process.env.GITHUB_OWNER || 'ROBA12551';
 const GITHUB_API = 'https://api.github.com';
 
 exports.handler = async (event) => {
-    console.log('=== Tracks Function ===');
+    console.log('=== Profile Function ===');
     console.log('Method:', event.httpMethod);
 
     const headers = {
@@ -25,14 +25,14 @@ exports.handler = async (event) => {
         };
     }
 
-    // ★ GET リクエスト: トラックを取得
+    // ★ GET リクエスト: プロフィール情報を取得
     if (event.httpMethod === 'GET') {
-        return handleGetTracks(headers);
+        return handleGetProfile(event, headers);
     }
 
-    // ★ POST リクエスト: トラックを保存
+    // ★ POST リクエスト: プロフィール情報を保存
     if (event.httpMethod === 'POST') {
-        return handlePostTracks(event, headers);
+        return handlePostProfile(event, headers);
     }
 
     return {
@@ -42,9 +42,22 @@ exports.handler = async (event) => {
     };
 };
 
-// GET: トラックを取得
-async function handleGetTracks(headers) {
+// ★ GET: プロフィール情報を取得
+async function handleGetProfile(event, headers) {
     try {
+        const username = event.queryStringParameters?.username;
+
+        if (!username) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({
+                    success: false,
+                    error: 'Username required'
+                })
+            };
+        }
+
         if (!GITHUB_TOKEN) {
             console.error('No GITHUB_TOKEN');
             return {
@@ -52,13 +65,14 @@ async function handleGetTracks(headers) {
                 headers,
                 body: JSON.stringify({
                     success: false,
-                    error: 'GitHub token not configured',
-                    tracks: []
+                    error: 'GitHub token not configured'
                 })
             };
         }
 
-        const url = `${GITHUB_API}/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/tracks`;
+        // ★ GitHub から profiles/username.json を取得
+        const filePath = `profiles/${username}.json`;
+        const url = `${GITHUB_API}/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}`;
 
         console.log('Fetching from:', url);
 
@@ -73,13 +87,23 @@ async function handleGetTracks(headers) {
 
         if (!response.ok) {
             if (response.status === 404) {
-                console.log('Tracks folder not found - returning empty array');
+                console.log('Profile not found - returning default');
                 return {
                     statusCode: 200,
                     headers,
                     body: JSON.stringify({
                         success: true,
-                        tracks: []
+                        profile: {
+                            name: username,
+                            email: '',
+                            location: '',
+                            bio: '',
+                            avatarLetter: username.charAt(0).toUpperCase(),
+                            avatarUrl: '',
+                            verified: false,
+                            followers: 0,
+                            createdAt: new Date().toISOString()
+                        }
                     })
                 };
             }
@@ -91,80 +115,43 @@ async function handleGetTracks(headers) {
                 headers,
                 body: JSON.stringify({
                     success: false,
-                    error: 'Failed to fetch tracks',
-                    tracks: []
+                    error: 'Failed to fetch profile'
                 })
             };
         }
 
-        const files = await response.json();
-        console.log('Found files:', files.length);
+        const fileData = await response.json();
+        const profileJson = JSON.parse(
+            Buffer.from(fileData.content, 'base64').toString('utf-8')
+        );
 
-        if (!Array.isArray(files)) {
-            console.error('Response is not an array');
-            return {
-                statusCode: 200,
-                headers,
-                body: JSON.stringify({
-                    success: true,
-                    tracks: []
-                })
-            };
-        }
-
-        const tracks = [];
-
-        for (const file of files) {
-            if (file.name.endsWith('.json')) {
-                try {
-                    const fileResponse = await fetch(file.url, {
-                        headers: {
-                            'Authorization': `token ${GITHUB_TOKEN}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    });
-
-                    if (fileResponse.ok) {
-                        const fileData = await fileResponse.json();
-                        const trackJson = JSON.parse(
-                            Buffer.from(fileData.content, 'base64').toString('utf-8')
-                        );
-                        tracks.push(trackJson);
-                        console.log('Loaded track:', trackJson.id);
-                    }
-                } catch (error) {
-                    console.error('Error loading track:', file.name, error.message);
-                }
-            }
-        }
-
-        console.log('✅ Total tracks loaded:', tracks.length);
+        console.log('✅ Loaded profile:', profileJson.name);
 
         return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
                 success: true,
-                tracks: tracks
+                profile: profileJson,
+                sha: fileData.sha
             })
         };
 
     } catch (error) {
-        console.error('Get tracks error:', error.message);
+        console.error('Get profile error:', error.message);
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({
                 success: false,
-                error: error.message,
-                tracks: []
+                error: error.message
             })
         };
     }
 }
 
-// ★ POST: トラックを保存
-async function handlePostTracks(event, headers) {
+// ★ POST: プロフィール情報を保存
+async function handlePostProfile(event, headers) {
     try {
         if (!GITHUB_TOKEN) {
             console.error('No GITHUB_TOKEN');
@@ -192,99 +179,124 @@ async function handlePostTracks(event, headers) {
             };
         }
 
-        const { tracks } = body;
+        const { action, username, profile, sha } = body;
 
-        if (!Array.isArray(tracks)) {
+        if (action !== 'save') {
             return {
                 statusCode: 400,
                 headers,
                 body: JSON.stringify({
                     success: false,
-                    error: 'Tracks must be an array'
+                    error: 'Invalid action'
                 })
             };
         }
 
-        console.log(`Saving ${tracks.length} tracks to GitHub...`);
+        if (!username || !profile) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({
+                    success: false,
+                    error: 'Username and profile required'
+                })
+            };
+        }
 
-        // ★ 各トラックを GitHub に保存
-        for (const track of tracks) {
+        console.log(`Saving profile for ${username}...`);
+
+        // ★ プロフィール情報を GitHub に保存
+        const filePath = `profiles/${username}.json`;
+        const url = `${GITHUB_API}/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}`;
+
+        // ★ 既存ファイルの SHA を取得（更新時に必要）
+        let existingSha = sha;
+        if (!existingSha) {
             try {
-                const trackId = track.id || `track-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-                const fileName = `${trackId}.json`;
-                const filePath = `tracks/${fileName}`;
-
-                const trackContent = JSON.stringify(track, null, 2);
-                const encodedContent = Buffer.from(trackContent).toString('base64');
-
-                // GitHub API で ファイルを作成/更新
-                const url = `${GITHUB_API}/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}`;
-
-                // ★ 既存ファイルの SHA を取得（更新時に必要）
-                let sha = null;
-                try {
-                    const getResponse = await fetch(url, {
-                        headers: {
-                            'Authorization': `token ${GITHUB_TOKEN}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    });
-
-                    if (getResponse.ok) {
-                        const existingFile = await getResponse.json();
-                        sha = existingFile.sha;
-                        console.log(`Updating existing track: ${trackId}`);
-                    }
-                } catch (e) {
-                    console.log(`Creating new track: ${trackId}`);
-                }
-
-                // ★ ファイルを作成/更新
-                const putBody = {
-                    message: `Update track: ${track.title || trackId}`,
-                    content: encodedContent,
-                    branch: 'main'
-                };
-
-                if (sha) {
-                    putBody.sha = sha;
-                }
-
-                const putResponse = await fetch(url, {
-                    method: 'PUT',
+                const getResponse = await fetch(url, {
                     headers: {
                         'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(putBody)
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
                 });
 
-                if (!putResponse.ok) {
-                    const errorText = await putResponse.text();
-                    console.error(`Failed to save track ${trackId}:`, putResponse.status, errorText.substring(0, 200));
-                } else {
-                    console.log(`✅ Saved track: ${trackId}`);
+                if (getResponse.ok) {
+                    const existingFile = await getResponse.json();
+                    existingSha = existingFile.sha;
+                    console.log(`Found existing profile, SHA: ${existingSha}`);
                 }
-
-            } catch (error) {
-                console.error('Error saving individual track:', error.message);
-                // Continue with next track
+            } catch (e) {
+                console.log('No existing profile, creating new');
             }
         }
+
+        // ★ プロフィール情報を整形
+        const profileData = {
+            name: profile.name,
+            email: profile.email || '',
+            location: profile.location || '',
+            bio: profile.bio || '',
+            avatarLetter: profile.avatarLetter || username.charAt(0).toUpperCase(),
+            avatarUrl: profile.avatarUrl || '',  // ★ 画像 URL またはBase64
+            verified: profile.verified || false,
+            followers: profile.followers || 0,
+            updatedAt: new Date().toISOString(),
+            createdAt: profile.createdAt || new Date().toISOString()
+        };
+
+        const profileContent = JSON.stringify(profileData, null, 2);
+        const encodedContent = Buffer.from(profileContent).toString('base64');
+
+        // ★ GitHub に保存
+        const putBody = {
+            message: `Update profile: ${profile.name}`,
+            content: encodedContent,
+            branch: 'main'
+        };
+
+        if (existingSha) {
+            putBody.sha = existingSha;
+        }
+
+        const putResponse = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(putBody)
+        });
+
+        if (!putResponse.ok) {
+            const errorText = await putResponse.text();
+            console.error('Failed to save profile:', putResponse.status, errorText.substring(0, 200));
+            return {
+                statusCode: 500,
+                headers,
+                body: JSON.stringify({
+                    success: false,
+                    error: `Failed to save profile: ${putResponse.status}`
+                })
+            };
+        }
+
+        const putData = await putResponse.json();
+        console.log(`✅ Saved profile: ${username}`);
 
         return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
                 success: true,
-                message: `Saved ${tracks.length} tracks`,
-                count: tracks.length
+                message: `Profile saved for ${username}`,
+                profile: profileData,
+                sha: putData.content.sha
             })
         };
 
     } catch (error) {
-        console.error('Post tracks error:', error.message);
+        console.error('Post profile error:', error.message);
         return {
             statusCode: 500,
             headers,
