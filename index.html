@@ -959,12 +959,12 @@
     <div class="page-wrapper">
         <div class="header">
             <a href="/" class="logo">
-                <div class="logo-icon"><a href="images/icon.png"></a></div>
+                <div class="logo-icon">B</div>
                 BeatWave
             </a>
 
             <div class="search-bar">
-                <span class="search-icon"></span>
+                <span class="search-icon">🔍</span>
                 <input type="text" id="searchInput" placeholder="Search tracks, artists...">
             </div>
 
@@ -1072,6 +1072,7 @@
         </div>
     </div>
 
+    <!-- Modals -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
@@ -1121,138 +1122,5 @@
     </div>
 
     <script defer src="app.js"></script>
-    
-    <script>
-        const STORAGE_PREFIX = 'soundwave_';
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
-        }
-
-        async function handleSignup() {
-            const username = document.getElementById('signupUsername').value.trim();
-            const email = document.getElementById('signupEmail').value.trim();
-            const password = document.getElementById('signupPassword').value;
-
-            if (!username || !email || !password) {
-                alert('Please fill all fields');
-                return;
-            }
-
-            if (password.length < 6) {
-                alert('Password must be at least 6 characters');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/auth`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, email, password })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    localStorage.setItem(STORAGE_PREFIX + 'user', JSON.stringify({
-                        username: data.user.username,
-                        email: data.user.email,
-                        id: data.user.id,
-                        encryptedKey: data.encryptedKey
-                    }));
-
-                    closeModal('signupModal');
-                    updateUIForUser();
-                    alert('✅ Account created! Encryption key: ' + data.encryptedKey);
-                } else {
-                    alert('Error: ' + (data.error || 'Signup failed'));
-                }
-            } catch (error) {
-                alert('Signup error: ' + error.message);
-            }
-        }
-
-        async function handleLogin() {
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const encryptedKey = document.getElementById('loginKey').value.trim();
-
-            if (!username || !password || !encryptedKey) {
-                alert('Please fill all fields');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/auth`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password, encryptedKey })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    localStorage.setItem(STORAGE_PREFIX + 'user', JSON.stringify({
-                        username: data.user.username,
-                        email: data.user.email,
-                        id: data.user.id,
-                        encryptedKey: encryptedKey
-                    }));
-
-                    closeModal('loginModal');
-                    updateUIForUser();
-                    alert(`✅ Welcome back, ${username}!`);
-                } else {
-                    alert('❌ Error: ' + (data.error || 'Login failed'));
-                }
-            } catch (error) {
-                alert('Login error: ' + error.message);
-            }
-        }
-
-        function updateUIForUser() {
-            const savedUser = localStorage.getItem(STORAGE_PREFIX + 'user');
-            const currentUser = savedUser ? JSON.parse(savedUser) : null;
-
-            const loginBtn = document.getElementById('loginBtn');
-            const uploadBtn = document.getElementById('uploadBtn');
-            const userBtn = document.getElementById('userBtn');
-            const logoutBtn = document.getElementById('logoutBtn');
-
-            if (currentUser) {
-                if (loginBtn) loginBtn.style.display = 'none';
-                if (uploadBtn) uploadBtn.style.display = 'block';
-                if (userBtn) {
-                    userBtn.style.display = 'block';
-                    userBtn.textContent = currentUser.username[0].toUpperCase();
-                    // ★ プロフィールページへ移動
-                    userBtn.onclick = () => {
-                        window.location.href = '/profile.html';
-                    };
-                }
-                if (logoutBtn) {
-                    logoutBtn.style.display = 'block';
-                    logoutBtn.onclick = () => {
-                        localStorage.removeItem(STORAGE_PREFIX + 'user');
-                        location.reload();
-                    };
-                }
-            } else {
-                if (loginBtn) {
-                    loginBtn.style.display = 'block';
-                    loginBtn.onclick = () => openModal('loginModal');
-                }
-                if (uploadBtn) uploadBtn.style.display = 'none';
-                if (userBtn) userBtn.style.display = 'none';
-                if (logoutBtn) logoutBtn.style.display = 'none';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', updateUIForUser);
-    </script>
 </body>
 </html>
