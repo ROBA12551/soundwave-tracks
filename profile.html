@@ -161,6 +161,8 @@
             width: 150px;
             height: 150px;
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            background-size: cover;
+            background-position: center;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -582,12 +584,12 @@
             <div class="profile-avatar" id="profileAvatar">S</div>
             <div class="profile-info">
                 <div class="profile-name">
-                    <span id="profileName">Syensan/学先生</span>
+                    <span id="profileName">user</span>
                     <div class="verified-badge" id="verifiedBadge" style="display: none;"></div>
                 </div>
-                <div class="profile-location" id="profileLocation">🇯🇵 Japan</div>
+                <div class="profile-location" id="profileLocation">...</div>
                 <div class="profile-description" id="profileDescription">
-                    Music artist | 音楽を愛する | Independent producer
+                   ...
                 </div>
             </div>
         </div>
@@ -625,7 +627,7 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-card">
-                <button class="btn btn-primary" id="editProfileBtn">Edit Profile</button>
+                <button class="btn btn-primary" id="editProfileBtn">✏️ Edit Profile</button>
                 <button class="btn btn-secondary" id="shareProfileBtn">Share</button>
             </div>
 
@@ -648,12 +650,12 @@
             <div class="form-group">
                 <label>Avatar Image</label>
                 <div class="avatar-upload-wrapper">
-                    <div class="avatar-preview" id="avatarPreview"></div>
+                    <div class="avatar-preview" id="avatarPreview">👤</div>
                     <div style="flex: 1;">
                         <input type="file" id="avatarUpload" class="avatar-upload-input" accept="image/*">
                         <input type="hidden" id="avatarBase64" value="">
                         <button type="button" class="avatar-upload-btn" onclick="document.getElementById('avatarUpload').click()">
-                            Upload Image
+                            📸 Upload Image
                         </button>
                         <p style="font-size: 11px; color: var(--text-secondary); margin-top: 8px;">JPG, PNG (max 5MB)</p>
                     </div>

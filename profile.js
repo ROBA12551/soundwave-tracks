@@ -109,7 +109,20 @@ function displayProfile() {
     userProfile = profileData;
 
     // アバター
-    document.getElementById('profileAvatar').textContent = profileData.avatarLetter;
+    const avatarEl = document.getElementById('profileAvatar');
+    if (avatarEl) {
+        // ★ Base64画像がある場合は表示
+        if (profileData.avatarUrl && profileData.avatarUrl.startsWith('data:image')) {
+            avatarEl.style.backgroundImage = `url(${profileData.avatarUrl})`;
+            avatarEl.style.backgroundSize = 'cover';
+            avatarEl.style.backgroundPosition = 'center';
+            avatarEl.textContent = '';  // テキストを非表示
+        } else {
+            // ★ 画像がない場合は文字を表示
+            avatarEl.style.backgroundImage = '';
+            avatarEl.textContent = profileData.avatarLetter || 'U';
+        }
+    }
 
     // 名前
     document.getElementById('profileName').textContent = profileData.name;
@@ -239,6 +252,28 @@ function openEditModal() {
     document.getElementById('editBio').value = profileData.bio || '';
     document.getElementById('editAvatarLetter').value = profileData.avatarLetter || '';
 
+    // ★ 既存のアバター画像をプレビューに表示
+    const previewEl = document.getElementById('avatarPreview');
+    if (previewEl) {
+        if (profileData.avatarUrl && profileData.avatarUrl.startsWith('data:image')) {
+            // Base64 画像がある場合
+            previewEl.style.backgroundImage = `url(${profileData.avatarUrl})`;
+            previewEl.style.backgroundSize = 'cover';
+            previewEl.style.backgroundPosition = 'center';
+            previewEl.textContent = '';  // テキストを非表示
+        } else {
+            // 画像がない場合は文字を表示
+            previewEl.style.backgroundImage = '';
+            previewEl.textContent = profileData.avatarLetter || '👤';
+        }
+    }
+
+    // ★ avatarBase64 の hidden input をクリア（新しい画像が選択されたときのため）
+    const base64Input = document.getElementById('avatarBase64');
+    if (base64Input) {
+        base64Input.value = '';
+    }
+
     document.getElementById('editModal').classList.add('active');
 }
 
@@ -251,13 +286,50 @@ function handleAvatarUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
 
+    // ★ ファイルサイズをチェック（5MB = 5242880 bytes）
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;  // 5MB
+    
+    if (file.size > MAX_FILE_SIZE) {
+        alert(`❌ File too large!\nMax: 5MB\nYour file: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+        event.target.value = '';  // ファイル選択をリセット
+        return;
+    }
+
+    // ★ ファイルタイプをチェック
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    
+    if (!ALLOWED_TYPES.includes(file.type)) {
+        alert('❌ Invalid file type!\nSupported: JPG, PNG, GIF, WebP');
+        event.target.value = '';
+        return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
         const base64 = e.target.result;
-        document.getElementById('avatarPreview').style.backgroundImage = `url(${base64})`;
-        document.getElementById('avatarBase64').value = base64;
-        console.log('✅ Avatar image loaded');
+        
+        // ★ プレビューに表示
+        const previewEl = document.getElementById('avatarPreview');
+        if (previewEl) {
+            previewEl.style.backgroundImage = `url(${base64})`;
+            previewEl.style.backgroundSize = 'cover';
+            previewEl.style.backgroundPosition = 'center';
+        }
+        
+        // ★ Base64をhidden inputに保存
+        const base64Input = document.getElementById('avatarBase64');
+        if (base64Input) {
+            base64Input.value = base64;
+        }
+        
+        console.log(`✅ Avatar image loaded (${(file.size / 1024).toFixed(1)}KB)`);
     };
+    
+    reader.onerror = (e) => {
+        console.error('❌ Failed to read file:', e);
+        alert('❌ Failed to read file. Please try again.');
+    };
+    
     reader.readAsDataURL(file);
 }
 
