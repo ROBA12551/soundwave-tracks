@@ -632,7 +632,6 @@ async function saveTracksToGitHub() {
         return false;
     }
     }
-}
 
 function updateAllTrackDisplays() {
     displayFeaturedTrack();
