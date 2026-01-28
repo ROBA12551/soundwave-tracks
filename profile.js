@@ -105,23 +105,41 @@ async function loadProfileFromGitHub() {
 // ===== PROFILE DISPLAY =====
 
 function displayProfile() {
+    console.log('🔍 displayProfile() called');
+    
     const profileData = userProfile || loadProfileData();
     userProfile = profileData;
 
+    console.log('👤 Profile Data:', {
+        name: profileData.name,
+        avatarLetter: profileData.avatarLetter,
+        avatarUrlLength: profileData.avatarUrl ? profileData.avatarUrl.length : 0,
+        avatarUrlStart: profileData.avatarUrl ? profileData.avatarUrl.substring(0, 50) : 'N/A'
+    });
+
     // アバター
     const avatarEl = document.getElementById('profileAvatar');
+    console.log('🎨 Avatar element found:', !!avatarEl);
+    
     if (avatarEl) {
         // ★ Base64画像がある場合は表示
         if (profileData.avatarUrl && profileData.avatarUrl.startsWith('data:image')) {
+            console.log('✅ Using avatar image');
             avatarEl.style.backgroundImage = `url(${profileData.avatarUrl})`;
             avatarEl.style.backgroundSize = 'cover';
             avatarEl.style.backgroundPosition = 'center';
+            avatarEl.style.backgroundColor = 'transparent';  // ★ グラデーション背景を非表示
             avatarEl.textContent = '';  // テキストを非表示
+            console.log('✅ Avatar image applied');
         } else {
+            console.log('⏭️ No avatar image, using letter:', profileData.avatarLetter);
             // ★ 画像がない場合は文字を表示
             avatarEl.style.backgroundImage = '';
+            avatarEl.style.backgroundColor = '';  // グラデーション背景に戻す
             avatarEl.textContent = profileData.avatarLetter || 'U';
         }
+    } else {
+        console.error('❌ Avatar element not found!');
     }
 
     // 名前
@@ -283,8 +301,15 @@ function closeEditModal() {
 
 // ★ 画像ファイルをBase64に変換
 function handleAvatarUpload(event) {
+    console.log('📸 Avatar upload triggered');
+    
     const file = event.target.files[0];
-    if (!file) return;
+    if (!file) {
+        console.log('⏭️ No file selected');
+        return;
+    }
+
+    console.log(`📁 File selected: ${file.name}, Size: ${(file.size / 1024).toFixed(1)}KB, Type: ${file.type}`);
 
     // ★ ファイルサイズをチェック（5MB = 5242880 bytes）
     const MAX_FILE_SIZE = 5 * 1024 * 1024;  // 5MB
@@ -305,8 +330,10 @@ function handleAvatarUpload(event) {
     }
 
     const reader = new FileReader();
+    
     reader.onload = (e) => {
         const base64 = e.target.result;
+        console.log(`✅ File converted to Base64, Length: ${base64.length}`);
         
         // ★ プレビューに表示
         const previewEl = document.getElementById('avatarPreview');
@@ -314,15 +341,16 @@ function handleAvatarUpload(event) {
             previewEl.style.backgroundImage = `url(${base64})`;
             previewEl.style.backgroundSize = 'cover';
             previewEl.style.backgroundPosition = 'center';
+            previewEl.textContent = '';
+            console.log('✅ Preview updated');
         }
         
         // ★ Base64をhidden inputに保存
         const base64Input = document.getElementById('avatarBase64');
         if (base64Input) {
             base64Input.value = base64;
+            console.log(`✅ Base64 saved to input (${base64.length} chars)`);
         }
-        
-        console.log(`✅ Avatar image loaded (${(file.size / 1024).toFixed(1)}KB)`);
     };
     
     reader.onerror = (e) => {
@@ -330,6 +358,7 @@ function handleAvatarUpload(event) {
         alert('❌ Failed to read file. Please try again.');
     };
     
+    console.log('📖 Reading file as data URL...');
     reader.readAsDataURL(file);
 }
 
@@ -341,6 +370,14 @@ async function saveProfile() {
     const avatarLetter = document.getElementById('editAvatarLetter').value.trim().toUpperCase();
     const avatarBase64 = document.getElementById('avatarBase64').value;
 
+    console.log('🔍 Saving profile...');
+    console.log('  Name:', name);
+    console.log('  Location:', location);
+    console.log('  Bio:', bio);
+    console.log('  Avatar Letter:', avatarLetter);
+    console.log('  Avatar Base64 length:', avatarBase64 ? avatarBase64.length : 0);
+    console.log('  Has existing avatar:', !!(userProfile?.avatarUrl));
+
     if (!name) {
         alert('Name is required');
         return;
@@ -351,13 +388,26 @@ async function saveProfile() {
         return;
     }
 
+    // ★ avatarUrl を決定（新しい画像 > 既存画像 > 空）
+    let avatarUrl = '';
+    
+    if (avatarBase64) {
+        // ★ 新しい画像がアップロードされた
+        avatarUrl = avatarBase64;
+        console.log('✅ Using new avatar image');
+    } else if (userProfile?.avatarUrl) {
+        // ★ 既存画像を保持
+        avatarUrl = userProfile.avatarUrl;
+        console.log('✅ Using existing avatar image');
+    }
+
     const profileData = {
         name: name,
         email: currentUser?.email || '',
         location: location ? `🇯🇵 ${location}` : '🌍 Worldwide',
         bio: bio,
         avatarLetter: avatarLetter,
-        avatarUrl: avatarBase64 || (userProfile?.avatarUrl || ''),  // ★ Base64 または既存URL
+        avatarUrl: avatarUrl,  // ★ 新規 or 既存 or 空
         verified: (userProfile || {}).verified || false,
         followers: (userProfile || {}).followers || 0,
         createdAt: (userProfile || {}).createdAt || new Date().toISOString()
@@ -382,6 +432,7 @@ async function saveProfile() {
 
         if (data.success) {
             console.log('✅ Profile saved:', data.profile.name);
+            console.log('✅ Avatar URL length:', data.profile.avatarUrl ? data.profile.avatarUrl.length : 0);
             
             // ★ ローカルストレージにもキャッシュ
             localStorage.setItem(STORAGE_PREFIX + 'profileData', JSON.stringify(data.profile));
@@ -528,4 +579,46 @@ window.refreshProfileStats = function() {
     
     console.log('✅ Profile statistics refreshed');
     alert('✅ Statistics updated!');
+};
+
+// ★ デバッグ用：localStorage のプロフィール情報を表示
+window.debugProfile = function() {
+    console.log('=== DEBUG PROFILE ===');
+    
+    // localStorage から読み込み
+    const cached = localStorage.getItem(STORAGE_PREFIX + 'profileData');
+    if (cached) {
+        try {
+            const profile = JSON.parse(cached);
+            console.log('✅ Profile in localStorage:');
+            console.log('  Name:', profile.name);
+            console.log('  AvatarLetter:', profile.avatarLetter);
+            console.log('  AvatarUrl length:', profile.avatarUrl ? profile.avatarUrl.length : 0);
+            console.log('  AvatarUrl start:', profile.avatarUrl ? profile.avatarUrl.substring(0, 50) + '...' : 'N/A');
+        } catch (e) {
+            console.error('❌ Error parsing profile:', e);
+        }
+    } else {
+        console.warn('⚠️ No profile in localStorage');
+    }
+    
+    // userProfile から表示
+    if (userProfile) {
+        console.log('✅ Current userProfile:');
+        console.log('  Name:', userProfile.name);
+        console.log('  AvatarLetter:', userProfile.avatarLetter);
+        console.log('  AvatarUrl length:', userProfile.avatarUrl ? userProfile.avatarUrl.length : 0);
+    } else {
+        console.warn('⚠️ userProfile is null');
+    }
+    
+    // avatarBase64 input から表示
+    const base64Input = document.getElementById('avatarBase64');
+    if (base64Input) {
+        console.log('✅ avatarBase64 input:');
+        console.log('  Value length:', base64Input.value ? base64Input.value.length : 0);
+        console.log('  Value start:', base64Input.value ? base64Input.value.substring(0, 50) + '...' : 'N/A');
+    }
+    
+    console.log('=== END DEBUG ===');
 };
