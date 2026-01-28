@@ -729,6 +729,13 @@ function openUserProfile(username) {
         return;
     }
 
+    // ★ 自分のプロフィールの場合は profile.html へ移動
+    if (currentUser && username === currentUser.username) {
+        window.location.href = '/profile.html';
+        return;
+    }
+
+    // ★ 他のユーザーの場合はモーダルで表示
     let modal = document.getElementById('profileModal');
     if (!modal) {
         modal = document.createElement('div');
@@ -803,7 +810,8 @@ function openCurrentUserProfile() {
         return;
     }
 
-    openUserProfile(currentUser.username);
+    // ★ プロフィールページに移動
+    window.location.href = '/profile.html';
 }
 
 // ===== SIDEBAR NAVIGATION =====

@@ -8,15 +8,11 @@
     
     <title>BeatWave - Free Audio Streaming Platform</title>
     
-    <!-- ★ フォント読み込みを最適化 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-    
-    <!-- ★ Favicon を先に読み込み -->
     <link rel="icon" type="image/png" href="/images/icon.png">
     
-    <!-- ★ 重複を削除して最適化したCSS -->
     <style>
         * {
             margin: 0;
@@ -53,7 +49,6 @@
             flex-direction: column;
         }
 
-        /* ===== VERIFIED BADGE ===== */
         .verified-badge {
             display: inline-flex;
             align-items: center;
@@ -112,7 +107,6 @@
             font-size: 12px;
         }
 
-        /* Header */
         .header {
             background: linear-gradient(180deg, rgba(18, 18, 18, 0.95) 0%, rgba(18, 18, 18, 0.7) 100%);
             backdrop-filter: blur(10px);
@@ -260,7 +254,6 @@
             background: rgba(255, 107, 0, 0.1);
         }
 
-        /* Main Container */
         .main-container {
             flex: 1;
             display: flex;
@@ -327,7 +320,6 @@
             padding-left: 21px;
         }
 
-        /* Section */
         .section {
             margin-bottom: 48px;
         }
@@ -364,7 +356,6 @@
             color: var(--text-primary);
         }
 
-        /* Tracks Grid */
         .tracks-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
@@ -425,7 +416,6 @@
             color: var(--text-secondary);
         }
 
-        /* Track List */
         .track-list {
             display: flex;
             flex-direction: column;
@@ -482,6 +472,11 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .track-list-artist:hover {
+            color: var(--primary-color);
         }
 
         .track-list-meta {
@@ -511,7 +506,6 @@
             transform: scale(1.1);
         }
 
-        /* Featured Track */
         .featured-track {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
             border-radius: 12px;
@@ -577,6 +571,11 @@
             font-weight: 600;
             margin-bottom: 16px;
             color: white;
+            cursor: pointer;
+        }
+
+        .featured-artist:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .featured-stats {
@@ -638,7 +637,6 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -748,7 +746,6 @@
             display: none;
         }
 
-        /* Player */
         .player {
             position: fixed;
             bottom: 0;
@@ -783,6 +780,11 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .player-artist:hover {
+            color: var(--primary-color);
         }
 
         .player-controls {
@@ -849,7 +851,6 @@
             50% { opacity: 0.5; }
         }
 
-        /* Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -867,7 +868,6 @@
             background: var(--text-secondary);
         }
 
-        /* Responsive */
         @media (max-width: 1024px) {
             .sidebar {
                 width: 240px;
@@ -953,21 +953,18 @@
         }
     </style>
 
-
-    <!-- ★ AdSense を遅延読み込み（async defer） -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9788086433456762" crossorigin="anonymous" defer></script>
 </head>
 <body>
     <div class="page-wrapper">
-        <!-- Header -->
         <div class="header">
             <a href="/" class="logo">
-                <div class="logo-icon">B</div>
+                <div class="logo-icon"><a href="images/icon.png"></a></div>
                 BeatWave
             </a>
 
             <div class="search-bar">
-                <span class="search-icon">🔍</span>
+                <span class="search-icon"></span>
                 <input type="text" id="searchInput" placeholder="Search tracks, artists...">
             </div>
 
@@ -981,9 +978,7 @@
             </div>
         </div>
 
-        <!-- Main Container -->
         <div class="main-container">
-            <!-- Sidebar -->
             <div class="sidebar" id="sidebar">
                 <div class="sidebar-section">
                     <div class="sidebar-title">Browse</div>
@@ -999,9 +994,7 @@
                 </div>
             </div>
 
-            <!-- Content -->
             <div class="content" id="content">
-                <!-- Home View -->
                 <div id="homeView" class="view active">
                     <div id="featuredTrackContainer"></div>
                     <div class="section" id="realtimeSection">
@@ -1035,25 +1028,21 @@
                     </div>
                 </div>
 
-                <!-- Trending View -->
                 <div id="trendingView" class="view" style="display: none;">
                     <h1 class="section-title gradient" style="margin-bottom: 32px;">Trending Now</h1>
                     <div class="track-list" id="trendingTracks"></div>
                 </div>
 
-                <!-- For You View -->
                 <div id="forYouView" class="view" style="display: none;">
                     <h1 class="section-title gradient" style="margin-bottom: 32px;">For You</h1>
                     <div class="tracks-grid" id="forYouTracks"></div>
                 </div>
 
-                <!-- Liked View -->
                 <div id="likedView" class="view" style="display: none;">
                     <h1 class="section-title gradient" style="margin-bottom: 32px;">Liked Tracks</h1>
                     <div class="track-list" id="likedTracks"></div>
                 </div>
 
-                <!-- History View -->
                 <div id="historyView" class="view" style="display: none;">
                     <h1 class="section-title gradient" style="margin-bottom: 32px;">Listening History</h1>
                     <div class="track-list" id="historyTracks"></div>
@@ -1061,7 +1050,6 @@
             </div>
         </div>
 
-        <!-- Player -->
         <div class="player" id="player">
             <div class="player-info">
                 <div class="player-title" id="playerTitle">No track selected</div>
@@ -1084,7 +1072,6 @@
         </div>
     </div>
 
-    <!-- Modals -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
@@ -1135,8 +1122,8 @@
 
     <script defer src="app.js"></script>
     
- 
     <script>
+        const STORAGE_PREFIX = 'soundwave_';
 
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
@@ -1242,6 +1229,10 @@
                 if (userBtn) {
                     userBtn.style.display = 'block';
                     userBtn.textContent = currentUser.username[0].toUpperCase();
+                    // ★ プロフィールページへ移動
+                    userBtn.onclick = () => {
+                        window.location.href = '/profile.html';
+                    };
                 }
                 if (logoutBtn) {
                     logoutBtn.style.display = 'block';
