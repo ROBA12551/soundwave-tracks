@@ -115,7 +115,7 @@ function displayProfile() {
     document.getElementById('profileName').textContent = profileData.name;
 
     // 場所
-    document.getElementById('profileLocation').textContent = profileData.location ? `🇯🇵 ${profileData.location}` : '🌍 Worldwide';
+    document.getElementById('profileLocation').textContent = profileData.location ? `🇯🇵 ${profileData.location}` : ' Worldwide';
 
     // 説明
     document.getElementById('profileDescription').textContent = profileData.bio || 'Independent artist on BeatWave';
@@ -213,7 +213,7 @@ function openEditModal() {
 
     document.getElementById('editName').value = profileData.name || '';
     // ★ location が undefined の場合のチェック
-    document.getElementById('editLocation').value = (profileData.location || '').replace('🇯🇵 ', '').replace('🌍 ', '');
+    document.getElementById('editLocation').value = (profileData.location || '').replace('🇯🇵 ', '').replace(' ', '');
     document.getElementById('editBio').value = profileData.bio || '';
     document.getElementById('editAvatarLetter').value = profileData.avatarLetter || '';
 
@@ -260,10 +260,10 @@ async function saveProfile() {
     const profileData = {
         name: name,
         email: currentUser?.email || '',
-        location: location ? `🇯🇵 ${location}` : '🌍 Worldwide',
+        location: location ? `🇯🇵 ${location}` : ' Worldwide',
         bio: bio,
         avatarLetter: avatarLetter,
-        avatarUrl: avatarBase64 || (userProfile?.avatarUrl || ''),  // ★ Base64 または既存URL
+        avatarUrl: avatarBase64 || (userProfile?.avatarUrl || ''),  
         verified: (userProfile || {}).verified || false,
         followers: (userProfile || {}).followers || 0,
         createdAt: (userProfile || {}).createdAt || new Date().toISOString()
