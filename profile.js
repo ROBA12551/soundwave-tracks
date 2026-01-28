@@ -120,15 +120,36 @@ function displayProfile() {
     // 説明
     document.getElementById('profileDescription').textContent = profileData.bio || 'Independent artist on BeatWave';
 
-    // 統計情報
-    const userTracks = allTracks.filter(t => t.artist === profileData.name);
-    const totalPlays = userTracks.reduce((sum, t) => sum + (t.plays || 0), 0);
-    const totalLikes = userTracks.reduce((sum, t) => sum + (t.likes || 0), 0);
+    // ★ 統計情報は最初のロード時だけ表示
+    // 再生中に自動で変わるのを防ぐ
+    const cachedStatsKey = STORAGE_PREFIX + 'profileStats';
+    let stats = {};
+    
+    try {
+        const cached = localStorage.getItem(cachedStatsKey);
+        if (cached) stats = JSON.parse(cached);
+    } catch (e) {}
+
+    // ★ 初回ロード時のみ計算
+    if (!stats.tracks) {
+        const userTracks = allTracks.filter(t => t.artist === profileData.name);
+        const totalPlays = userTracks.reduce((sum, t) => sum + (t.plays || 0), 0);
+        const totalLikes = userTracks.reduce((sum, t) => sum + (t.likes || 0), 0);
+        
+        stats = {
+            tracks: userTracks.length,
+            plays: totalPlays,
+            likes: totalLikes
+        };
+        
+        localStorage.setItem(cachedStatsKey, JSON.stringify(stats));
+    }
+
     const followers = profileData.followers || 0;
 
-    document.getElementById('statTracks').textContent = userTracks.length;
-    document.getElementById('statPlays').textContent = formatNumber(totalPlays);
-    document.getElementById('statLikes').textContent = formatNumber(totalLikes);
+    document.getElementById('statTracks').textContent = stats.tracks || 0;
+    document.getElementById('statPlays').textContent = formatNumber(stats.plays || 0);
+    document.getElementById('statLikes').textContent = formatNumber(stats.likes || 0);
     document.getElementById('statFollowers').textContent = formatNumber(followers);
 
     // Verified バッジ
@@ -421,3 +442,17 @@ window.openEditModal = openEditModal;
 window.closeEditModal = closeEditModal;
 window.saveProfile = saveProfile;
 window.handleAvatarUpload = handleAvatarUpload;
+
+// ★ プロフィール統計情報を更新（手動リロード用）
+window.refreshProfileStats = function() {
+    console.log('🔄 Refreshing profile statistics...');
+    
+    // ★ キャッシュをクリア
+    localStorage.removeItem(STORAGE_PREFIX + 'profileStats');
+    
+    // ★ 再度計算・表示
+    displayProfile();
+    
+    console.log('✅ Profile statistics refreshed');
+    alert('✅ Statistics updated!');
+};

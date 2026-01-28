@@ -165,21 +165,38 @@ async function handlePostProfile(event, headers) {
             };
         }
 
-        let body;
-        try {
-            body = JSON.parse(event.body);
-        } catch (e) {
+        // ★ リクエストボディをデバッグ
+        console.log('Request body:', event.body ? event.body.substring(0, 200) : 'empty');
+
+        if (!event.body) {
             return {
                 statusCode: 400,
                 headers,
                 body: JSON.stringify({
                     success: false,
-                    error: 'Invalid JSON'
+                    error: 'Empty request body'
+                })
+            };
+        }
+
+        let body;
+        try {
+            body = JSON.parse(event.body);
+        } catch (e) {
+            console.error('JSON parse error:', e.message);
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({
+                    success: false,
+                    error: 'Invalid JSON: ' + e.message
                 })
             };
         }
 
         const { action, username, profile, sha } = body;
+
+        console.log('Parsed action:', action, 'username:', username, 'has profile:', !!profile);
 
         if (action !== 'save') {
             return {
@@ -187,18 +204,29 @@ async function handlePostProfile(event, headers) {
                 headers,
                 body: JSON.stringify({
                     success: false,
-                    error: 'Invalid action'
+                    error: 'Invalid action: ' + action
                 })
             };
         }
 
-        if (!username || !profile) {
+        if (!username) {
             return {
                 statusCode: 400,
                 headers,
                 body: JSON.stringify({
                     success: false,
-                    error: 'Username and profile required'
+                    error: 'Username required'
+                })
+            };
+        }
+
+        if (!profile || typeof profile !== 'object') {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({
+                    success: false,
+                    error: 'Profile must be an object'
                 })
             };
         }
@@ -268,6 +296,8 @@ async function handlePostProfile(event, headers) {
             body: JSON.stringify(putBody)
         });
 
+        console.log('PUT response status:', putResponse.status);
+
         if (!putResponse.ok) {
             const errorText = await putResponse.text();
             console.error('Failed to save profile:', putResponse.status, errorText.substring(0, 200));
@@ -281,8 +311,16 @@ async function handlePostProfile(event, headers) {
             };
         }
 
-        const putData = await putResponse.json();
-        console.log(`✅ Saved profile: ${username}`);
+        // ★ レスポンスをテキストで先に読んで、JSONか確認
+        let putData;
+        try {
+            putData = await putResponse.json();
+            console.log('✅ Saved profile:', username, 'SHA:', putData?.content?.sha?.substring(0, 8));
+        } catch (e) {
+            console.warn('⚠️ Could not parse PUT response as JSON:', e.message);
+            // GitHub API が正常に保存した場合でも JSON がない場合がある
+            putData = { content: { sha: 'unknown' } };
+        }
 
         return {
             statusCode: 200,
@@ -291,7 +329,7 @@ async function handlePostProfile(event, headers) {
                 success: true,
                 message: `Profile saved for ${username}`,
                 profile: profileData,
-                sha: putData.content.sha
+                sha: putData?.content?.sha || 'unknown'
             })
         };
 

@@ -511,9 +511,6 @@ async function playTrack(trackId) {
     
     // ★ 現在再生中のトラック ID を設定
     currentTrackId = trackId;
-    
-    // ★ 非同期で再生数をインクリメント（UI をブロックしない）
-    incrementPlayCount(trackId).catch(err => console.error('Play count error:', err));
 
     currentAudio = new Audio();
     currentAudio.crossOrigin = 'anonymous';
@@ -527,6 +524,14 @@ async function playTrack(trackId) {
     if (titleEl) titleEl.textContent = track.title || 'Untitled';
     if (artistEl) artistEl.textContent = track.artist || 'Unknown';
 
+    // ★ 3秒以上再生されたかチェック用フラグ
+    let countedThisPlay = false;
+    let playStartTime = null;
+
+    currentAudio.addEventListener('play', () => {
+        playStartTime = Date.now();
+    });
+
     currentAudio.addEventListener('timeupdate', () => {
         const fillEl = document.getElementById('playerProgressFill');
         const timeEl = document.getElementById('timeDisplay');
@@ -537,6 +542,13 @@ async function playTrack(trackId) {
         
         if (timeEl) {
             timeEl.textContent = formatTime(currentAudio.currentTime);
+        }
+
+        // ★ 3秒以上再生されたら、カウント
+        if (!countedThisPlay && currentAudio.currentTime >= 3) {
+            countedThisPlay = true;
+            console.log(`⏱️ Track played 3+ seconds, counting play...`);
+            incrementPlayCount(trackId).catch(err => console.error('Play count error:', err));
         }
     });
 
@@ -626,14 +638,39 @@ async function incrementPlayCount(trackId) {
         const track = allTracks.find(t => t.id === trackId);
         if (!track) return;
 
-        // ★ このセッション内で既に再生済みなら、スキップ
-        if (playedTracksInSession.has(trackId)) {
-            console.log(`⏭️ Already counted in this session: ${track.title}`);
+        // ★ localStorage に保存された再生履歴を確認
+        const playHistoryKey = STORAGE_PREFIX + 'playCountHistory';
+        let playHistory = {};
+        
+        try {
+            const saved = localStorage.getItem(playHistoryKey);
+            if (saved) playHistory = JSON.parse(saved);
+        } catch (e) {
+            playHistory = {};
+        }
+
+        // ★ 今日の日付キーを作成
+        const today = new Date().toISOString().split('T')[0];  // YYYY-MM-DD
+        const historyKey = `${trackId}-${today}`;  // track-123-2024-01-28
+
+        // ★ 今日このトラックが既にカウントされたか確認
+        if (playHistory[historyKey]) {
+            console.log(`⏭️ Already counted today: ${track.title}`);
             return;
         }
 
-        // ★ 再生済みとしてマーク
-        playedTracksInSession.add(trackId);
+        // ★ 今日のカウント済みトラックとしてマーク
+        playHistory[historyKey] = Date.now();
+        
+        // ★ 古い履歴（7日以上前）を削除してストレージを圧縮
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        for (let key in playHistory) {
+            if (key.split('-').pop() < sevenDaysAgo) {
+                delete playHistory[key];
+            }
+        }
+        
+        localStorage.setItem(playHistoryKey, JSON.stringify(playHistory));
 
         // ★ 再生カウントをインクリメント
         track.plays = (track.plays || 0) + 1;
@@ -684,7 +721,6 @@ async function saveTracksToGitHub() {
         return false;
     }
     }
-
 
 function updateAllTrackDisplays() {
     displayFeaturedTrack();
