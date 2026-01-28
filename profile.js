@@ -120,6 +120,11 @@ function displayProfile() {
     // 説明
     document.getElementById('profileDescription').textContent = profileData.bio || 'Independent artist on BeatWave';
 
+    // ★ userTracks を定義（スコープ外で使用するため）
+    const userTracks = allTracks.filter(t => t.artist === profileData.name);
+    const totalPlays = userTracks.reduce((sum, t) => sum + (t.plays || 0), 0);
+    const totalLikes = userTracks.reduce((sum, t) => sum + (t.likes || 0), 0);
+
     // ★ 統計情報は最初のロード時だけ表示
     // 再生中に自動で変わるのを防ぐ
     const cachedStatsKey = STORAGE_PREFIX + 'profileStats';
@@ -130,12 +135,8 @@ function displayProfile() {
         if (cached) stats = JSON.parse(cached);
     } catch (e) {}
 
-    // ★ 初回ロード時のみ計算
+    // ★ 初回ロード時のみ計算（stats が空の場合）
     if (!stats.tracks) {
-        const userTracks = allTracks.filter(t => t.artist === profileData.name);
-        const totalPlays = userTracks.reduce((sum, t) => sum + (t.plays || 0), 0);
-        const totalLikes = userTracks.reduce((sum, t) => sum + (t.likes || 0), 0);
-        
         stats = {
             tracks: userTracks.length,
             plays: totalPlays,
