@@ -29,6 +29,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('⚡ Loading tracks asynchronously...');
     loadAllTracksAsync();
     
+    // ★ プロフィールページから戻ってきた場合、自動再生
+    const urlParams = new URLSearchParams(window.location.search);
+    const playTrackId = urlParams.get('play') || sessionStorage.getItem('playTrackId');
+    
+    if (playTrackId) {
+        console.log('🎵 Auto-playing track:', playTrackId);
+        sessionStorage.removeItem('playTrackId');
+        
+        // トラックが読み込まれるまで待機
+        setTimeout(() => {
+            playTrack(playTrackId);
+        }, 1000);
+        
+        // URL をクリーンアップ（?play=xxx を削除）
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
     console.log('✅ BeatWave UI ready');
 });
 
@@ -615,6 +632,7 @@ async function saveTracksToGitHub() {
         return false;
     }
     }
+}
 
 function updateAllTrackDisplays() {
     displayFeaturedTrack();
