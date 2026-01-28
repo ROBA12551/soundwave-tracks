@@ -325,8 +325,22 @@ async function handlePostProfile(event, headers) {
             createdAt: profile.createdAt || new Date().toISOString()
         };
 
+        // ★ デバッグ：avatarUrl が含まれているか確認
+        console.log('Profile data being saved:');
+        console.log('  Name:', profileData.name);
+        console.log('  AvatarLetter:', profileData.avatarLetter);
+        console.log('  AvatarUrl present:', !!profileData.avatarUrl);
+        console.log('  AvatarUrl length:', profileData.avatarUrl ? profileData.avatarUrl.length : 0);
+        console.log('  AvatarUrl start:', profileData.avatarUrl ? profileData.avatarUrl.substring(0, 50) : 'N/A');
+
         const profileContent = JSON.stringify(profileData, null, 2);
         const encodedContent = Buffer.from(profileContent).toString('base64');
+        
+        // ★ デバッグ：Base64 エンコード後のサイズを確認
+        console.log('Encoded content size:', encodedContent.length, 'bytes');
+        if (encodedContent.length > 1000000) {
+            console.warn('⚠️ Large Base64 size - this may cause issues');
+        }
 
         // ★ GitHub に保存
         const putBody = {

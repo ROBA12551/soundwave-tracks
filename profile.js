@@ -77,12 +77,27 @@ async function loadProfileFromGitHub() {
             return;
         }
 
-        console.log('📥 Loading profile from GitHub...');
+        console.log('=== LOAD PROFILE FROM GITHUB ===');
+        console.log('📥 Loading profile for user:', currentUser.username);
+        
         const response = await fetch(`${API_BASE}/profile?username=${encodeURIComponent(currentUser.username)}`);
+        
+        console.log('📡 API Response Status:', response.status);
         
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
         const data = await response.json();
+        
+        console.log('📡 API Response Data:');
+        console.log('  Success:', data.success);
+        console.log('  Has profile:', !!data.profile);
+        if (data.profile) {
+            console.log('  Profile name:', data.profile.name);
+            console.log('  Profile avatarUrl present:', !!data.profile.avatarUrl);
+            console.log('  Profile avatarUrl length:', data.profile.avatarUrl ? data.profile.avatarUrl.length : 0);
+            console.log('  Profile avatarUrl start:', data.profile.avatarUrl ? data.profile.avatarUrl.substring(0, 50) + '...' : 'N/A');
+        }
+        
         if (data.success && data.profile) {
             // ★ デフォルト値とマージして、すべてのプロパティが存在することを確認
             userProfile = {
@@ -91,7 +106,7 @@ async function loadProfileFromGitHub() {
                 location: data.profile.location || '🇯🇵 Japan',
                 bio: data.profile.bio || 'Music artist on BeatWave',
                 avatarLetter: data.profile.avatarLetter || currentUser.username?.charAt(0).toUpperCase() || 'U',
-                avatarUrl: data.profile.avatarUrl || '',
+                avatarUrl: data.profile.avatarUrl || '',  // ★ ここで avatarUrl を取得
                 verified: data.profile.verified || false,
                 followers: data.profile.followers || 0,
                 createdAt: data.profile.createdAt || new Date().toISOString(),
@@ -99,10 +114,15 @@ async function loadProfileFromGitHub() {
                 sha: data.sha  // GitHub の SHA（更新時に必要）
             };
             
+            console.log('✅ Profile merged:');
+            console.log('  Final avatarUrl present:', !!userProfile.avatarUrl);
+            console.log('  Final avatarUrl length:', userProfile.avatarUrl ? userProfile.avatarUrl.length : 0);
+            
             console.log('✅ Profile loaded from GitHub:', userProfile.name);
             
             // ★ localStorage にキャッシュ
             localStorage.setItem(STORAGE_PREFIX + 'profileData', JSON.stringify(userProfile));
+            console.log('✅ Cached to localStorage');
         }
     } catch (e) {
         console.warn('⚠️ Error loading profile from GitHub:', e);
@@ -125,17 +145,18 @@ async function loadProfileFromGitHub() {
 // ===== PROFILE DISPLAY =====
 
 function displayProfile() {
+    console.log('=== DISPLAY PROFILE ===');
     console.log('🔍 displayProfile() called');
     
     const profileData = userProfile || loadProfileData();
     userProfile = profileData;
 
-    console.log('👤 Profile Data:', {
-        name: profileData.name,
-        avatarLetter: profileData.avatarLetter,
-        avatarUrlLength: profileData.avatarUrl ? profileData.avatarUrl.length : 0,
-        avatarUrlStart: profileData.avatarUrl ? profileData.avatarUrl.substring(0, 50) : 'N/A'
-    });
+    console.log('👤 Profile Data:');
+    console.log('  Name:', profileData.name);
+    console.log('  AvatarLetter:', profileData.avatarLetter);
+    console.log('  AvatarUrl present:', !!profileData.avatarUrl);
+    console.log('  AvatarUrl length:', profileData.avatarUrl ? profileData.avatarUrl.length : 0);
+    console.log('  AvatarUrl starts with data:image:', profileData.avatarUrl ? profileData.avatarUrl.startsWith('data:image') : false);
 
     // アバター
     const avatarEl = document.getElementById('profileAvatar');
@@ -144,13 +165,13 @@ function displayProfile() {
     if (avatarEl) {
         // ★ Base64画像がある場合は表示
         if (profileData.avatarUrl && profileData.avatarUrl.startsWith('data:image')) {
-            console.log('✅ Using avatar image');
+            console.log('✅ Setting avatar background image (length: ' + profileData.avatarUrl.length + ')');
             avatarEl.style.backgroundImage = `url(${profileData.avatarUrl})`;
             avatarEl.style.backgroundSize = 'cover';
             avatarEl.style.backgroundPosition = 'center';
             avatarEl.style.backgroundColor = 'transparent';  // ★ グラデーション背景を非表示
             avatarEl.textContent = '';  // テキストを非表示
-            console.log('✅ Avatar image applied');
+            console.log('✅ Avatar background image set');
         } else {
             console.log('⏭️ No avatar image, using letter:', profileData.avatarLetter);
             // ★ 画像がない場合は文字を表示
@@ -180,21 +201,6 @@ function displayProfile() {
     console.log('  Profile Name:', profileData.name);
     console.log('  Total allTracks:', allTracks.length);
     console.log('  Matching userTracks:', userTracks.length);
-    console.log('  Sample tracks (first 3):');
-    
-    // ★ allTracks の最初の3つを表示（デバッグ用）
-    allTracks.slice(0, 3).forEach(t => {
-        console.log(`    - ${t.title} (artist: ${t.artist})`);
-    });
-    
-    // ★ アーティスト名の完全一致をチェック
-    if (allTracks.length > 0) {
-        const artists = [...new Set(allTracks.map(t => t.artist))];
-        console.log('  All unique artists:', artists);
-        
-        const nameMatches = artists.filter(a => a === profileData.name);
-        console.log('  Exact matches with profile name:', nameMatches);
-    }
 
     // ★ 統計情報は最初のロード時だけ表示
     // 再生中に自動で変わるのを防ぐ
@@ -418,13 +424,19 @@ async function saveProfile() {
     const avatarLetter = document.getElementById('editAvatarLetter').value.trim().toUpperCase();
     const avatarBase64 = document.getElementById('avatarBase64').value;
 
-    console.log('🔍 Saving profile...');
+    console.log('=== SAVE PROFILE DEBUG ===');
+    console.log('🔍 Form Data:');
     console.log('  Name:', name);
     console.log('  Location:', location);
     console.log('  Bio:', bio);
     console.log('  Avatar Letter:', avatarLetter);
+    console.log('  Avatar Base64 available:', !!avatarBase64);
     console.log('  Avatar Base64 length:', avatarBase64 ? avatarBase64.length : 0);
-    console.log('  Has existing avatar:', !!(userProfile?.avatarUrl));
+    console.log('  Avatar Base64 start:', avatarBase64 ? avatarBase64.substring(0, 50) + '...' : 'EMPTY');
+    
+    console.log('📦 Existing Data:');
+    console.log('  Has existing avatar in userProfile:', !!(userProfile?.avatarUrl));
+    console.log('  Existing avatar length:', userProfile?.avatarUrl ? userProfile.avatarUrl.length : 0);
 
     if (!name) {
         alert('Name is required');
@@ -442,11 +454,13 @@ async function saveProfile() {
     if (avatarBase64) {
         // ★ 新しい画像がアップロードされた
         avatarUrl = avatarBase64;
-        console.log('✅ Using new avatar image');
+        console.log('✅ Using NEW avatar image from upload');
     } else if (userProfile?.avatarUrl) {
         // ★ 既存画像を保持
         avatarUrl = userProfile.avatarUrl;
-        console.log('✅ Using existing avatar image');
+        console.log('✅ Using EXISTING avatar image');
+    } else {
+        console.log('⏭️ No avatar image');
     }
 
     const profileData = {
@@ -455,14 +469,20 @@ async function saveProfile() {
         location: location ? `🇯🇵 ${location}` : '🌍 Worldwide',
         bio: bio,
         avatarLetter: avatarLetter,
-        avatarUrl: avatarUrl,  // ★ 新規 or 既存 or 空
+        avatarUrl: avatarUrl,  // ★ これが GitHub に送信される
         verified: (userProfile || {}).verified || false,
         followers: (userProfile || {}).followers || 0,
         createdAt: (userProfile || {}).createdAt || new Date().toISOString()
     };
 
+    console.log('📊 Profile Data to Send:');
+    console.log('  Name:', profileData.name);
+    console.log('  AvatarUrl present:', !!profileData.avatarUrl);
+    console.log('  AvatarUrl length:', profileData.avatarUrl ? profileData.avatarUrl.length : 0);
+    console.log('  Full profileData:', JSON.stringify(profileData).substring(0, 200) + '...');
+
     try {
-        console.log('💾 Saving profile to GitHub...');
+        console.log('💾 Sending to GitHub API...');
         
         // ★ GitHub に保存
         const response = await fetch(`${API_BASE}/profile`, {
@@ -476,26 +496,37 @@ async function saveProfile() {
             })
         });
 
+        console.log('📡 API Response Status:', response.status);
+
         const data = await response.json();
+        console.log('📡 API Response:', data);
 
         if (data.success) {
-            console.log('✅ Profile saved:', data.profile.name);
-            console.log('✅ Avatar URL length:', data.profile.avatarUrl ? data.profile.avatarUrl.length : 0);
+            console.log('✅ Profile saved successfully');
+            console.log('  Returned name:', data.profile.name);
+            console.log('  Returned avatarUrl length:', data.profile.avatarUrl ? data.profile.avatarUrl.length : 0);
+            console.log('  Returned avatarUrl present:', !!data.profile.avatarUrl);
             
             // ★ ローカルストレージにもキャッシュ
             localStorage.setItem(STORAGE_PREFIX + 'profileData', JSON.stringify(data.profile));
+            console.log('✅ Saved to localStorage');
+            
             userProfile = data.profile;
+            console.log('✅ Updated userProfile in memory');
             
             displayProfile();
             closeEditModal();
             alert('✅ Profile updated successfully!');
         } else {
             alert('❌ Error: ' + (data.error || 'Failed to save profile'));
+            console.error('❌ API Error:', data.error);
         }
     } catch (error) {
         console.error('❌ Error saving profile:', error);
         alert('Error saving profile: ' + error.message);
     }
+    
+    console.log('=== END SAVE PROFILE DEBUG ===');
 }
 
 // ===== EVENT LISTENERS =====
