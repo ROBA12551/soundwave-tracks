@@ -101,6 +101,7 @@ async function loadProfileFromGitHub() {
         if (data.success && data.profile) {
             // ★ デフォルト値とマージして、すべてのプロパティが存在することを確認
             userProfile = {
+                username: data.profile.username || currentUser?.username,  // ★ username を必ず含める
                 name: data.profile.name || currentUser.username,
                 email: data.profile.email || currentUser.email,
                 location: data.profile.location || '🇯🇵 Japan',
@@ -115,6 +116,8 @@ async function loadProfileFromGitHub() {
             };
             
             console.log('✅ Profile merged:');
+            console.log('  Username:', userProfile.username);
+            console.log('  Name:', userProfile.name);
             console.log('  Final avatarUrl present:', !!userProfile.avatarUrl);
             console.log('  Final avatarUrl length:', userProfile.avatarUrl ? userProfile.avatarUrl.length : 0);
             
@@ -192,15 +195,27 @@ function displayProfile() {
     // 説明
     document.getElementById('profileDescription').textContent = profileData.bio || 'Independent artist on BeatWave';
 
-    // ★ userTracks を定義（スコープ外で使用するため）
-    const userTracks = allTracks.filter(t => t.artist === profileData.name);
+    // ★ userTracks を定義（username で比較）
+    // artist フィールドには username が保存されているはず
+    const userTracks = allTracks.filter(t => {
+        // artist に username が保存されている場合
+        if (t.artist === profileData.username) return true;
+        
+        // 互換性のため、artist に 名前 が保存されている場合も対応
+        if (t.artist === profileData.name) return true;
+        
+        return false;
+    });
     const totalPlays = userTracks.reduce((sum, t) => sum + (t.plays || 0), 0);
     const totalLikes = userTracks.reduce((sum, t) => sum + (t.likes || 0), 0);
 
     console.log('🎵 Track Information:');
     console.log('  Profile Name:', profileData.name);
+    console.log('  Profile Username:', profileData.username);
     console.log('  Total allTracks:', allTracks.length);
     console.log('  Matching userTracks:', userTracks.length);
+    console.log('  Matching by username:', allTracks.filter(t => t.artist === profileData.username).length);
+    console.log('  Matching by name:', allTracks.filter(t => t.artist === profileData.name).length);
 
     // ★ 統計情報は最初のロード時だけ表示
     // 再生中に自動で変わるのを防ぐ
@@ -722,9 +737,13 @@ window.debugTracks = function() {
     }
     
     if (userProfile) {
-        const userTracks = allTracks.filter(t => t.artist === userProfile.name);
+        // ★ username で比較、互換性のため name でも対応
+        const userTracks = allTracks.filter(t => 
+            t.artist === userProfile.username || t.artist === userProfile.name
+        );
         console.log('\n✅ Tracks for current profile:');
         console.log('  Profile name:', userProfile.name);
+        console.log('  Profile username:', userProfile.username);
         console.log('  Matching tracks:', userTracks.length);
         if (userTracks.length > 0) {
             console.log('  First 3 tracks:');

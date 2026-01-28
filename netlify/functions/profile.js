@@ -118,6 +118,7 @@ async function handleGetProfile(event, headers) {
                     body: JSON.stringify({
                         success: true,
                         profile: {
+                            username: username,  // ★ username を追加
                             name: username,
                             email: '',
                             location: '',
@@ -313,6 +314,7 @@ async function handlePostProfile(event, headers) {
 
         // ★ プロフィール情報を整形
         const profileData = {
+            username: username,  // ★ username を追加（トラック関連付けに必要）
             name: profile.name,
             email: profile.email || '',
             location: profile.location || '',
@@ -325,8 +327,9 @@ async function handlePostProfile(event, headers) {
             createdAt: profile.createdAt || new Date().toISOString()
         };
 
-        // ★ デバッグ：avatarUrl が含まれているか確認
+        // ★ デバッグ：username が含まれているか確認
         console.log('Profile data being saved:');
+        console.log('  Username:', profileData.username);
         console.log('  Name:', profileData.name);
         console.log('  AvatarLetter:', profileData.avatarLetter);
         console.log('  AvatarUrl present:', !!profileData.avatarUrl);
