@@ -15,6 +15,8 @@ let isPlayingTrack = false;
 let allTracks = [];
 let playlist = [];
 let likedTracks = new Set();
+let currentTrackId = null;  // ★ 現在再生中のトラック ID
+let playedTracksInSession = new Set();  // ★ このセッション内で再生済みのトラック
 
 // ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', async () => {
@@ -485,6 +487,13 @@ function displayHistoryTracks() {
 async function playTrack(trackId) {
     if (!trackId) return;
 
+    // ★ 同じトラックが既に再生中なら、スキップ
+    if (currentTrackId === trackId && isPlayingTrack) {
+        console.log('⏭️ Track already playing, skipping...');
+        return;
+    }
+
+    // ★ 前のオーディオを停止
     if (currentAudio) {
         try {
             currentAudio.pause();
@@ -499,7 +508,12 @@ async function playTrack(trackId) {
     }
 
     console.log('▶️ Playing track:', trackId);
-    await incrementPlayCount(trackId);
+    
+    // ★ 現在再生中のトラック ID を設定
+    currentTrackId = trackId;
+    
+    // ★ 非同期で再生数をインクリメント（UI をブロックしない）
+    incrementPlayCount(trackId).catch(err => console.error('Play count error:', err));
 
     currentAudio = new Audio();
     currentAudio.crossOrigin = 'anonymous';
@@ -527,14 +541,40 @@ async function playTrack(trackId) {
     });
 
     currentAudio.addEventListener('ended', () => {
+        isPlayingTrack = false;
+        currentTrackId = null;
         if (playBtn) playBtn.textContent = '▶';
         playNext();
     });
 
+    // ★ エラーハンドリング改善
+    currentAudio.addEventListener('error', (e) => {
+        console.error('Audio error:', e);
+        isPlayingTrack = false;
+        if (playBtn) playBtn.textContent = '▶';
+    });
+
     try {
-        await currentAudio.play();
-        isPlayingTrack = true;
-        if (playBtn) playBtn.textContent = '⏸';
+        // ★ 再生を開始
+        const playPromise = currentAudio.play();
+        
+        if (playPromise !== undefined) {
+            playPromise
+                .then(() => {
+                    isPlayingTrack = true;
+                    if (playBtn) playBtn.textContent = '⏸';
+                    console.log('✅ Playback started');
+                })
+                .catch(err => {
+                    console.error('Play error:', err.message);
+                    isPlayingTrack = false;
+                    if (playBtn) playBtn.textContent = '▶';
+                });
+        } else {
+            // ★ 古いブラウザ対応
+            isPlayingTrack = true;
+            if (playBtn) playBtn.textContent = '⏸';
+        }
     } catch (err) {
         console.error('Play error:', err.message);
     }
@@ -586,7 +626,19 @@ async function incrementPlayCount(trackId) {
         const track = allTracks.find(t => t.id === trackId);
         if (!track) return;
 
+        // ★ このセッション内で既に再生済みなら、スキップ
+        if (playedTracksInSession.has(trackId)) {
+            console.log(`⏭️ Already counted in this session: ${track.title}`);
+            return;
+        }
+
+        // ★ 再生済みとしてマーク
+        playedTracksInSession.add(trackId);
+
+        // ★ 再生カウントをインクリメント
         track.plays = (track.plays || 0) + 1;
+        console.log(`✅ Play count incremented: ${track.title} (${track.plays})`);
+        
         updateAllTrackDisplays();
         await saveTracksToGitHub();
     } catch (error) {
@@ -632,6 +684,7 @@ async function saveTracksToGitHub() {
         return false;
     }
     }
+
 
 function updateAllTrackDisplays() {
     displayFeaturedTrack();
