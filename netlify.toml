@@ -1,0 +1,27 @@
+[build]
+command = "echo 'Build completed'"
+functions = "netlify/functions"
+publish = "."
+
+# Functions first
+[[redirects]]
+from = "/.netlify/functions/*"
+to = "/.netlify/functions/:splat"
+status = 200
+force = true
+
+# SPA routes
+[[redirects]]
+from = "/artist/:username"
+to = "/artist.html?username=:username"
+status = 200
+
+[[redirects]]
+from = "/track/:trackId"
+to = "/track.html?trackId=:trackId"
+status = 200
+
+[[redirects]]
+from = "/*"
+to = "/"
+status = 200

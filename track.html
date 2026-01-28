@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track - BeatWave</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <meta name="google-adsense-account" content="ca-pub-9788086433456762">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+/* ===== VERIFIED BADGE - TikTok Style ===== */
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 900;
+            margin-left: 6px;
+            vertical-align: middle;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            animation: verifyPulse 2s infinite;
+        }
+
+        .verified-badge::before {
+            content: '✓';
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+
+        @keyframes verifyPulse {
+            0%, 100% { 
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
+            50% { 
+                box-shadow: 0 2px 8px rgba(29, 185, 84, 0.4);
+            }
+        }
+
+        .artist-link .verified-badge {
+            margin-left: 4px;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+        }
+
+        #profileName .verified-badge {
+            margin-left: 8px;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+        }
+        :root {
+            --primary-color: #ff6b00;
+            --accent-color: #FFA500;
+            --dark-bg: #121212;
+            --card-bg: #1E1E1E;
+            --hover-bg: #282828;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B3B3B3;
+            --border-color: #282828;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: 'Rubik', sans-serif;
+        }
+
+        .header {
+            background: linear-gradient(180deg, rgba(18, 18, 18, 0.95) 0%, rgba(18, 18, 18, 0.7) 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content {
+            flex: 1;
+            padding: 40px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .track-hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            border-radius: 16px;
+            padding: 48px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+            margin-bottom: 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .track-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .track-hero > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .track-cover {
+            width: 100%;
+            max-width: 300px;
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 100px;
+            overflow: hidden;
+        }
+
+        .track-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .track-info h1 {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 12px;
+            color: white;
+        }
+
+        .artist-link {
+            display: inline-block;
+            font-size: 18px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            margin-bottom: 16px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .artist-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .track-meta {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .meta-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .meta-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 4px;
+        }
+
+        .track-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 24px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary-color);
+            font-size: 16px;
+            padding: 14px 32px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .comments-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 48px;
+        }
+
+        .comment-form {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .comment-form input {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            color: var(--text-primary);
+            font-family: 'Rubik', sans-serif;
+            outline: none;
+        }
+
+        .comment-form input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .comment-form button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            border: none;
+            border-radius: 24px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .comment {
+            background: var(--hover-bg);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .comment-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .comment-name {
+            font-weight: 600;
+        }
+
+        .comment-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .comment-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/" class="logo">
+            <div class="logo-icon">B</div>
+            BeatWave
+        </a>
+        <button onclick="window.history.back()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer;">← Back</button>
+    </div>
+
+    <div class="content">
+        <div id="trackContainer"></div>
+    </div>
+
+    <script>
+        const API_BASE = '/.netlify/functions';
+        const STORAGE_PREFIX = 'soundwave_';
+        let currentTrack = null;
+        let currentUser = null;
+        let likedTracks = new Set();
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const savedUser = localStorage.getItem(STORAGE_PREFIX + 'user');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                } catch (e) {
+                    console.error('Error loading user:', e);
+                }
+            }
+
+            const savedLikes = localStorage.getItem(STORAGE_PREFIX + 'likedTracks');
+            if (savedLikes) {
+                try {
+                    likedTracks = new Set(JSON.parse(savedLikes));
+                } catch (e) {
+                    console.error('Error loading likes:', e);
+                }
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            const trackId = params.get('trackId');
+
+            if (!trackId) {
+                document.getElementById('trackContainer').innerHTML = '<div class="error">Track not found</div>';
+                return;
+            }
+
+            await loadTrack(trackId);
+        });
+
+        async function loadTrack(trackId) {
+            const container = document.getElementById('trackContainer');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/tracks`);
+                const data = await response.json();
+
+                const track = data.tracks?.find(t => t.id === trackId);
+                if (!track) {
+                    container.innerHTML = '<div style="color: var(--text-secondary);">Track not found</div>';
+                    return;
+                }
+
+                currentTrack = track;
+
+                const isLiked = likedTracks.has(trackId);
+                const html = `
+                    <div class="track-hero">
+                        <div class="track-cover">
+                            ${track.coverUrl ? `<img src="${track.coverUrl}" alt="${track.title}">` : '🎵'}
+                        </div>
+                        <div class="track-info">
+                            <h1>${escapeHtml(track.title)}</h1>
+
+<a href="/profile.html?username=${track.artist}" class="artist-link">
+    By ${escapeHtml(track.artist)}${track.verified ? '<span class="verified-badge"></span>' : ''}
+</a>
+                            <div class="track-meta">
+                                <div class="meta-item">
+                                    <div class="meta-value">${formatNumber(track.plays || 0)}</div>
+                                    <div class="meta-label">Plays</div>
+                                </div>
+                                <div class="meta-item">
+                                    <div class="meta-value">${formatNumber(track.likes || 0)}</div>
+                                    <div class="meta-label">Likes</div>
+                                </div>
+                                <div class="meta-item">
+                                    <div class="meta-value">0</div>
+                                    <div class="meta-label">Comments</div>
+                                </div>
+                                <div class="meta-item">
+                                    <div class="meta-value">${escapeHtml(track.genre)}</div>
+                                    <div class="meta-label">Genre</div>
+                                </div>
+                            </div>
+                            ${track.description ? `<p style="color: rgba(255, 255, 255, 0.85); margin-bottom: 24px;">${escapeHtml(track.description)}</p>` : ''}
+                            <div class="track-actions">
+                                <button class="btn btn-primary" onclick="playTrack('${track.audioUrl}')">▶ Play</button>
+                                ${currentUser ? `<button class="btn btn-primary" id="likeBtn" style="background: ${isLiked ? '#FF4444' : 'rgba(255, 255, 255, 0.2)'};" onclick="toggleLike()">❤ ${isLiked ? 'Liked' : 'Like'}</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="comments-section">
+                        <h2 style="font-size: 20px; font-weight: 900; margin-bottom: 24px;">Comments</h2>
+                        ${currentUser ? `
+                            <div class="comment-form">
+                                <input type="text" id="commentInput" placeholder="Add a comment...">
+                                <button onclick="postComment('${trackId}')">Post</button>
+                            </div>
+                        ` : '<p style="color: var(--text-secondary); margin-bottom: 16px;">Sign in to comment</p>'}
+                        <div id="commentsList"></div>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+                loadComments(trackId);
+                incrementPlayCount(trackId);
+
+            } catch (error) {
+                console.error('Error:', error);
+                container.innerHTML = '<div style="color: var(--text-secondary);">Error loading track</div>';
+            }
+        }
+
+        function playTrack(audioUrl) {
+            const audio = new Audio(audioUrl);
+            audio.play();
+        }
+
+        async function toggleLike() {
+            if (!currentUser) {
+                alert('Please sign in to like');
+                return;
+            }
+
+            const isLiked = likedTracks.has(currentTrack.id);
+            if (isLiked) {
+                likedTracks.delete(currentTrack.id);
+            } else {
+                likedTracks.add(currentTrack.id);
+            }
+
+            localStorage.setItem(STORAGE_PREFIX + 'likedTracks', JSON.stringify(Array.from(likedTracks)));
+            
+            const btn = document.getElementById('likeBtn');
+            btn.style.background = !isLiked ? '#FF4444' : 'rgba(255, 255, 255, 0.2)';
+            btn.textContent = !isLiked ? '❤ Liked' : '❤ Like';
+        }
+
+        async function postComment(trackId) {
+            if (!currentUser) {
+                alert('Please sign in to comment');
+                return;
+            }
+
+            const input = document.getElementById('commentInput');
+            const text = input.value.trim();
+
+            if (!text) return;
+
+            input.value = '';
+            await loadComments(trackId);
+        }
+
+        async function loadComments(trackId) {
+            const container = document.getElementById('commentsList');
+            container.innerHTML = '<p style="color: var(--text-secondary);">No comments yet</p>';
+        }
+
+        async function incrementPlayCount(trackId) {
+            try {
+                // Track play for IP-based duplicate prevention
+                const storedPlays = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'playsToday') || '{}');
+                const today = new Date().toDateString();
+                
+                if (!storedPlays[today]) {
+                    storedPlays[today] = [];
+                }
+
+                if (!storedPlays[today].includes(trackId)) {
+                    storedPlays[today].push(trackId);
+                    localStorage.setItem(STORAGE_PREFIX + 'playsToday', JSON.stringify(storedPlays));
+                }
+            } catch (error) {
+                console.error('Error tracking play:', error);
+            }
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        // track.html - Make artist name/icon clickable for profile
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Make artist link clickable
+    const artistLink = document.querySelector('.artist-link');
+    if (artistLink) {
+        artistLink.style.cursor = 'pointer';
+        artistLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            const artist = new URLSearchParams(window.location.search).get('trackId');
+            
+            // Get artist from track data or from link text
+            const artistName = artistLink.textContent.replace('By ', '').trim();
+            window.location.href = `/profile.html?username=${encodeURIComponent(artistName)}`;
+        });
+    }
+
+    // Also make track cover image clickable to go to profile
+    const trackCover = document.querySelector('.track-cover img');
+    if (trackCover && currentTrack?.artist) {
+        trackCover.style.cursor = 'pointer';
+        trackCover.title = `View ${currentTrack.artist}'s profile`;
+        trackCover.addEventListener('click', () => {
+            window.location.href = `/profile.html?username=${encodeURIComponent(currentTrack.artist)}`;
+        });
+    }
+});
+    </script>
+</body>
+</html>

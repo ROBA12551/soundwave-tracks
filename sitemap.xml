@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+
+  <!-- ============================================
+       Main Pages
+       ============================================ -->
+
+  <!-- Home Page -->
+  <url>
+    <loc>https://soundwave.live/</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <mobile:mobile/>
+  </url>
+
+  <!-- Trending -->
+  <url>
+    <loc>https://soundwave.live/trending</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+    <mobile:mobile/>
+  </url>
+
+  <!-- Discover -->
+  <url>
+    <loc>https://soundwave.live/discover</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+    <mobile:mobile/>
+  </url>
+
+  <!-- New Releases -->
+  <url>
+    <loc>https://soundwave.live/new</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+
+  <!-- ============================================
+       Genre Pages
+       ============================================ -->
+
+  <url>
+    <loc>https://soundwave.live/genre/electronic</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://soundwave.live/genre/hip-hop</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://soundwave.live/genre/pop</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://soundwave.live/genre/rock</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://soundwave.live/genre/jazz</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://soundwave.live/genre/classical</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+
+  <!-- ============================================
+       Artist Pages (Examples)
+       ============================================ -->
+
+  <url>
+    <loc>https://soundwave.live/artist/demo</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <mobile:mobile/>
+  </url>
+
+  <!-- ============================================
+       Track Pages (Examples)
+       ============================================ -->
+
+  <url>
+    <loc>https://soundwave.live/track/demo001</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <mobile:mobile/>
+    <image:image>
+      <image:loc>https://via.placeholder.com/300x300?text=Welcome</image:loc>
+      <image:title>Welcome to SoundWave</image:title>
+    </image:image>
+  </url>
+
+  <!-- ============================================
+       User Pages
+       ============================================ -->
+
+  <url>
+    <loc>https://soundwave.live/me</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://soundwave.live/likes</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+    <mobile:mobile/>
+  </url>
+
+  <url>
+    <loc>https://soundwave.live/history</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+    <mobile:mobile/>
+  </url>
+
+  <!-- ============================================
+       Info Pages
+       ============================================ -->
+
+  <url>
+    <loc>https://soundwave.live/policy</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://soundwave.live/about</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://soundwave.live/contact</loc>
+    <lastmod>2024-01-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset>

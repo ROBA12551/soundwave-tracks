@@ -1,0 +1,150 @@
+# ============================================
+# SoundWave Audio Platform - robots.txt
+# ============================================
+# This file tells search engine crawlers which URLs to crawl and which to ignore
+
+# ============================================
+# Global Rules (All Search Engines)
+# ============================================
+
+User-agent: *
+Allow: /
+
+# Allow specific paths for crawling
+Allow: /index.html
+Allow: /artist/
+Allow: /track/
+Allow: /genre/
+Allow: /trending
+Allow: /discover
+Allow: /*.js
+Allow: /*.css
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.svg
+Allow: /sitemap.xml
+
+# Disallow unnecessary paths
+Disallow: /admin/
+Disallow: /api/
+Disallow: /.env
+Disallow: /.git/
+Disallow: /node_modules/
+Disallow: /*?sort=
+Disallow: /*?filter=
+Disallow: /*?page=2
+Disallow: /*&page=
+Disallow: /user/settings/
+Disallow: /user/private/
+Disallow: /temp/
+Disallow: /backup/
+Disallow: /cache/
+
+# Crawl delay (wait 1 second between requests)
+Crawl-delay: 1
+
+# Request rate (pages per second)
+Request-rate: 30/60
+
+# ============================================
+# Specific Rules for Googlebot
+# ============================================
+
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /.git/
+Disallow: /node_modules/
+Crawl-delay: 0
+
+# Google-specific optimization
+User-agent: Googlebot-Image
+Allow: /images/
+Allow: *.jpg$
+Allow: *.png$
+Allow: *.svg$
+
+# ============================================
+# Rules for Bingbot
+# ============================================
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin/
+Disallow: /.git/
+Crawl-delay: 1
+
+# ============================================
+# Rules for Other Search Engines
+# ============================================
+
+User-agent: Slurp
+Allow: /
+Disallow: /admin/
+Crawl-delay: 1
+
+User-agent: DuckDuckBot
+Allow: /
+Disallow: /admin/
+Crawl-delay: 1
+
+User-agent: Baidu
+Allow: /
+Disallow: /admin/
+Crawl-delay: 2
+
+User-agent: Yandex
+Allow: /
+Disallow: /admin/
+Crawl-delay: 1
+
+# ============================================
+# Rules for Bad Bots (Block Them)
+# ============================================
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: MojeekBot
+Disallow: /
+
+# ============================================
+# Sitemap Location
+# ============================================
+
+Sitemap: https://soundwave.live/sitemap.xml
+Sitemap: https://soundwave.live/sitemap-artists.xml
+Sitemap: https://soundwave.live/sitemap-tracks.xml
+
+# ============================================
+# Notes for Webmasters
+# ============================================
+# 
+# 1. Update this file when:
+#    - Adding new sections to the site
+#    - Removing old pages
+#    - Changing crawl rates
+#
+# 2. Test this file:
+#    - Google Search Console: robots.txt Tester
+#    - https://www.robotstxt.org/robotstxt-tester.html
+#
+# 3. Monitor crawling:
+#    - Google Search Console: Crawl Stats
+#    - Check logs for crawl patterns
+#
+# 4. Best Practices:
+#    - Keep URLs short
+#    - Use meaningful URLs
+#    - Avoid duplicate content
+#    - Use canonical tags where needed
+#

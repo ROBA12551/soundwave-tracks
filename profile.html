@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="google-adsense-account" content="ca-pub-9788086433456762">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - BeatWave</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        /* ===== VERIFIED BADGE - TikTok Style ===== */
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 900;
+            margin-left: 6px;
+            vertical-align: middle;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            animation: verifyPulse 2s infinite;
+        }
+
+        .verified-badge::before {
+            content: '✓';
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+
+        @keyframes verifyPulse {
+            0%, 100% { 
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
+            50% { 
+                box-shadow: 0 2px 8px rgba(29, 185, 84, 0.4);
+            }
+        }
+
+        .artist-link .verified-badge {
+            margin-left: 4px;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+        }
+
+        #profileName .verified-badge {
+            margin-left: 8px;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+        }
+ 
+
+        /* アニメーション効果 */
+        @keyframes verifyPulse {
+            0%, 100% { 
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
+            50% { 
+                box-shadow: 0 2px 8px rgba(29, 185, 84, 0.4);
+            }
+        }
+
+        /* ユーザー名の横のバッジ */
+        .track-list-artist .verified-badge,
+        .track-list-title .verified-badge {
+            margin-left: 4px;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+        }
+
+        /* Featured Track での認証バッジ */
+        .featured-info .verified-badge {
+            margin-left: 4px;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+        }
+
+        /* トラックカード内の認証バッジ */
+        .track-card h3 .verified-badge {
+            margin-left: 4px;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+        }
+
+        /* プロフィール画面での認証バッジ */
+        #profileModal .verified-badge {
+            margin-left: 8px;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+        }
+        :root {
+            --primary-color: #ff6b00;
+            --accent-color: #FFA500;
+            --dark-bg: #121212;
+            --card-bg: #1E1E1E;
+            --hover-bg: #282828;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B3B3B3;
+            --border-color: #282828;
+            --success-color: #1DB954;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: 'Rubik', sans-serif;
+        }
+
+        .page-wrapper {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(180deg, rgba(18, 18, 18, 0.95) 0%, rgba(18, 18, 18, 0.7) 100%);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .content {
+            flex: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 24px;
+            width: 90%;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 32px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--accent-color);
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 40px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .profile-avatar {
+            width: 140px;
+            height: 140px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            backdrop-filter: blur(10px);
+        }
+
+        .profile-info h1 {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 8px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-handle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 12px;
+        }
+
+        .profile-description {
+            font-size: 15px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 16px;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 24px;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 24px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .section {
+            margin-bottom: 48px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 24px;
+        }
+
+        .track-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .track-item {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            align-items: center;
+        }
+
+        .track-item:hover {
+            background: var(--hover-bg);
+            border-color: var(--border-color);
+        }
+
+        .track-cover {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            border-radius: 4px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .track-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .track-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .track-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .track-stats {
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .play-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .play-button:hover {
+            transform: scale(1.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .profile-header {
+                grid-template-columns: auto 1fr;
+                gap: 16px;
+                padding: 24px;
+            }
+
+            .profile-avatar {
+                width: 100px;
+                height: 100px;
+                font-size: 60px;
+            }
+
+            .profile-actions {
+                grid-column: 1 / -1;
+                flex-direction: row;
+            }
+
+            .profile-info h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="header">
+            <a href="index.html">BeatWave</a>
+        </div>
+
+        <div class="content">
+            <a href="index.html" class="back-link">Back to home</a>
+
+            <!-- Profile Header -->
+            <div class="profile-header" id="profileHeader">
+                <div class="profile-avatar" id="profileAvatar">A</div>
+                <div class="profile-info">
+                    <h1 id="profileName">Artist Name</h1>
+                    <div class="profile-handle" id="profileHandle">@artistname</div>
+                    <div class="profile-description" id="profileDescription">Artist bio goes here</div>
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <div class="stat-value" id="tracksCount">0</div>
+                            <div class="stat-label">Tracks</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="followersCount">0</div>
+                            <div class="stat-label">Followers</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="playsCount">0</div>
+                            <div class="stat-label">Total Plays</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-actions">
+                    <button class="btn btn-primary" id="followBtn" onclick="toggleFollow()">Follow</button>
+                    <button class="btn btn-secondary" id="editBtn" onclick="editProfile()" style="display: none;">Edit Profile</button>
+                    <button class="btn btn-secondary" id="shareBtn" onclick="shareProfile()">Share</button>
+                </div>
+            </div>
+
+            <!-- Tracks Section -->
+            <div class="section">
+                <h2 class="section-title">Tracks</h2>
+                <div class="track-list" id="tracksList">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">♪</div>
+                        <p>No tracks uploaded yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_PREFIX = 'soundwave_';
+        let currentUser = null;
+        let profileUser = null;
+        let userTracks = [];
+
+        document.addEventListener('DOMContentLoaded', initializeProfile);
+
+        async function initializeProfile() {
+            // Load current user from storage
+            const userData = localStorage.getItem(STORAGE_PREFIX + 'user');
+            if (userData) {
+                try {
+                    currentUser = JSON.parse(userData);
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+
+            // Get username from URL params or use current user
+            const params = new URLSearchParams(window.location.search);
+            let username = params.get('username') || params.get('user');
+
+            if (!username && currentUser) {
+                username = currentUser.username;
+            }
+
+            if (!username) {
+                console.error('No username specified');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Load profile data
+            await loadProfile(username);
+            await loadUserTracks(username);
+        }
+
+        async function loadProfile(username) {
+            try {
+                console.log('Loading profile for:', username);
+                const response = await fetch(`/.netlify/functions/profile?username=${username}`);
+                const data = await response.json();
+                console.log('Profile response:', data);
+
+                if (data.success && data.user) {
+                    profileUser = data.user;
+                } else {
+                    // Fallback data
+                    profileUser = {
+                        username: username,
+                        displayName: username,
+                        bio: 'Independent Artist',
+                        followers: 0,
+                        following: 0,
+                        verified: false
+                    };
+                }
+
+                renderProfileHeader(profileUser);
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
+
+                // Fallback data on error
+                profileUser = {
+                    username: username,
+                    displayName: username,
+                    bio: 'Independent Artist',
+                    followers: 0,
+                    following: 0,
+                    verified: false
+                };
+
+                renderProfileHeader(profileUser);
+            }
+        }
+
+        async function loadUserTracks(username) {
+            try {
+                const response = await fetch(`/.netlify/functions/tracks`);
+                const data = await response.json();
+
+                if (data.tracks) {
+                    userTracks = data.tracks.filter(t => t.artist === username);
+                }
+
+                renderTracks();
+            } catch (error) {
+                console.error('Error loading tracks:', error);
+                renderTracks();
+            }
+        }
+
+        function renderProfileHeader(profile) {
+    if (!profile) {
+        console.error('Profile is undefined');
+        return;
+    }
+
+    const initials = (profile.username || 'A').substring(0, 2).toUpperCase();
+    const avatarElement = document.getElementById('profileAvatar');
+
+    // Display avatar image if available, otherwise show initials
+    if (profile.avatar_url) {
+        avatarElement.innerHTML = `<img src="${profile.avatar_url}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">`;
+    } else {
+        avatarElement.textContent = initials;
+    }
+
+    // ★ 認証バッジを追加
+    const verifiedBadge = profile.verified ? '<span class="verified-badge"></span>' : '';
+    document.getElementById('profileName').innerHTML = `${profile.displayName || profile.username || 'Unknown Artist'}${verifiedBadge}`;
+    
+    document.getElementById('profileHandle').textContent = `@${profile.username || 'unknown'}`;
+    document.getElementById('profileDescription').textContent = profile.bio || 'Independent Artist';
+    document.getElementById('tracksCount').textContent = userTracks.length || 0;
+    document.getElementById('followersCount').textContent = formatNumber(profile.followers || 0);
+
+    const totalPlays = userTracks.reduce((sum, track) => sum + (track.plays || 0), 0);
+    document.getElementById('playsCount').textContent = formatNumber(totalPlays);
+
+    updateFollowButton();
+}
+
+        function renderTracks() {
+            const container = document.getElementById('tracksList');
+
+            if (!userTracks || userTracks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">♪</div>
+                        <p>No tracks uploaded yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = userTracks
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .map(track => `
+                    <div class="track-item" onclick="playTrack('${track.id}')">
+                        <div class="track-cover">${track.emoji || '♪'}</div>
+                        <div class="track-info">
+                            <div class="track-title">${escapeHtml(track.title)}</div>
+                            <div class="track-meta">${track.genre}</div>
+                            <div class="track-stats">
+                                <span>${formatNumber(track.plays || 0)} plays</span>
+                                <span>${formatNumber(track.likes || 0)} likes</span>
+                            </div>
+                        </div>
+                        <button class="play-button" onclick="event.stopPropagation(); playTrack('${track.id}')">▶</button>
+                    </div>
+                `).join('');
+        }
+
+        function updateFollowButton() {
+            const followBtn = document.getElementById('followBtn');
+            const editBtn = document.getElementById('editBtn');
+
+            if (!currentUser) {
+                followBtn.textContent = 'Login to Follow';
+                followBtn.disabled = true;
+                editBtn.style.display = 'none';
+                return;
+            }
+
+            if (currentUser.username === profileUser?.username) {
+                followBtn.style.display = 'none';
+                editBtn.style.display = 'block';
+            } else {
+                followBtn.textContent = 'Follow';
+                followBtn.disabled = false;
+                editBtn.style.display = 'none';
+            }
+        }
+
+        function editProfile() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+            `;
+
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: var(--card-bg);
+                border-radius: 12px;
+                padding: 32px;
+                max-width: 500px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+                color: var(--text-primary);
+            `;
+
+            content.innerHTML = `
+                <h2 style="margin-bottom: 24px;">Edit Profile</h2>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 12px; font-weight: 600;">Avatar</label>
+                    <div id="avatarPreview" style="
+                        width: 120px;
+                        height: 120px;
+                        background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+                        border-radius: 8px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 60px;
+                        margin-bottom: 12px;
+                        cursor: pointer;
+                        border: 2px solid var(--border-color);
+                    ">${(profileUser?.username || 'A').substring(0, 2).toUpperCase()}</div>
+                    <input type="file" id="avatarFile" accept="image/*" style="display: none;">
+                    <button onclick="document.getElementById('avatarFile').click()" style="
+                        width: 100%;
+                        padding: 10px;
+                        background: var(--hover-bg);
+                        border: 1px solid var(--border-color);
+                        border-radius: 6px;
+                        color: var(--text-primary);
+                        cursor: pointer;
+                        font-weight: 600;
+                        margin-bottom: 16px;
+                    ">Change Avatar</button>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 12px; font-weight: 600;">Display Name</label>
+                    <input type="text" id="editDisplayName" value="${profileUser?.displayName || profileUser?.username || ''}" placeholder="Your display name..." style="
+                        width: 100%;
+                        padding: 12px;
+                        background: var(--hover-bg);
+                        border: 1px solid var(--border-color);
+                        border-radius: 6px;
+                        color: var(--text-primary);
+                        font-family: 'Rubik', sans-serif;
+                        font-size: 14px;
+                        outline: none;
+                    ">
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 12px; font-weight: 600;">Bio</label>
+                    <textarea id="editBio" style="
+                        width: 100%;
+                        padding: 12px;
+                        background: var(--hover-bg);
+                        border: 1px solid var(--border-color);
+                        border-radius: 6px;
+                        color: var(--text-primary);
+                        font-family: 'Rubik', sans-serif;
+                        font-size: 14px;
+                        min-height: 100px;
+                        outline: none;
+                    " placeholder="Your bio...">${profileUser?.bio || ''}</textarea>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button onclick="this.closest('div').parentElement.parentElement.remove()" style="
+                        flex: 1;
+                        padding: 12px;
+                        background: var(--hover-bg);
+                        border: 1px solid var(--border-color);
+                        border-radius: 6px;
+                        color: var(--text-primary);
+                        cursor: pointer;
+                        font-weight: 600;
+                    ">Cancel</button>
+                    <button onclick="saveProfileChanges()" style="
+                        flex: 1;
+                        padding: 12px;
+                        background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+                        border: none;
+                        border-radius: 6px;
+                        color: white;
+                        cursor: pointer;
+                        font-weight: 600;
+                    ">Save</button>
+                </div>
+            `;
+
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+
+            const avatarFile = document.getElementById('avatarFile');
+            const avatarPreview = document.getElementById('avatarPreview');
+
+            avatarFile.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        avatarPreview.innerHTML = `<img src="${event.target.result}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">`;
+                        window.selectedAvatarFile = file;
+                        window.selectedAvatarData = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        async function saveProfileChanges() {
+            const displayName = document.getElementById('editDisplayName')?.value || '';
+            const bio = document.getElementById('editBio')?.value || '';
+            const avatarData = window.selectedAvatarData;
+
+            const modal = document.querySelector('div[style*="position: fixed"]');
+            if (modal) modal.remove();
+
+            if (!currentUser) {
+                alert('❌ Not logged in');
+                return;
+            }
+
+            try {
+                let avatarUrl = profileUser.avatar_url || '';
+
+                // If avatar image was selected, upload it first
+                if (avatarData) {
+                    console.log('Uploading avatar image...');
+                    
+                    try {
+                        // Extract MIME type and base64 data
+                        const mimeMatch = avatarData.match(/data:image\/(.*?);/);
+                        const imageType = mimeMatch ? mimeMatch[1] : 'jpeg';
+                        const base64Data = avatarData.split(',')[1];
+
+                        const imagePath = `profiles/avatars/${currentUser.username}.${imageType}`;
+                        const imageUrl = `https://api.github.com/repos/ROBA12551/soundwave-tracks/contents/${imagePath}`;
+
+                        // Get existing SHA if any
+                        let imageSha = null;
+                        try {
+                            const getResponse = await fetch(imageUrl, {
+                                headers: {
+                                    'Accept': 'application/vnd.github.v3+json'
+                                }
+                            });
+                            if (getResponse.ok) {
+                                const imageData = await getResponse.json();
+                                imageSha = imageData.sha;
+                                console.log('Found existing avatar');
+                            }
+                        } catch (e) {
+                            console.log('No existing avatar found');
+                        }
+
+                        // Note: This would require server-side upload with GitHub token
+                        // For now, we'll just use the image data as-is
+                        avatarUrl = avatarData;
+                        console.log('Avatar prepared for display');
+                    } catch (imageError) {
+                        console.error('Error processing avatar:', imageError.message);
+                        // Continue without avatar
+                    }
+                }
+const profileUpdateData = {
+    username: currentUser.username,
+    displayName: displayName || currentUser.username,  // ← 追加
+    bio: bio,
+    avatar_url: avatarUrl
+};
+
+                console.log('=== Saving Profile ===');
+                console.log('Username:', currentUser.username);
+                console.log('Bio:', bio);
+                console.log('Avatar URL length:', avatarUrl.length);
+
+                // Call profile update API
+                const response = await fetch('/.netlify/functions/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(profileUpdateData)
+                });
+
+                console.log('Response status:', response.status);
+
+                // Always read response as text first
+                const responseText = await response.text();
+                console.log('Response text (first 500 chars):', responseText.substring(0, 500));
+                console.log('Response length:', responseText.length);
+
+                // Handle empty response
+                if (!responseText || responseText.trim().length === 0) {
+                    console.error('Empty response from server');
+                    alert('❌ Server error (empty response). Check browser console.');
+                    return;
+                }
+
+                // Try to parse as JSON
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                    console.log('Parsed result:', result);
+                } catch (parseError) {
+                    console.error('JSON parse failed:', parseError);
+                    console.error('Response was HTML:', responseText.includes('<'));
+                    console.error('Response first 200 chars:', responseText.substring(0, 200));
+                    alert('❌ Server error (invalid response). Check browser console.');
+                    return;
+                }
+
+                if (response.ok && result.success) {
+                    // Update display
+profileUser = {
+    ...profileUser,
+    displayName: displayName || currentUser.username,  // ← 追加
+    bio: bio,
+    avatar_url: avatarUrl || profileUser.avatar_url || ''
+};
+                    document.getElementById('profileName').textContent = displayName || currentUser.username;
+                    document.getElementById('profileDescription').textContent = bio || 'Independent Artist';
+                    
+                    if (avatarData) {
+                        document.getElementById('profileAvatar').innerHTML = `<img src="${avatarData}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">`;
+                    }
+
+                    console.log('✅ Profile saved successfully');
+                    alert('✅ Profile saved!');
+                } else {
+                    const errorMsg = result.error || 'Unknown error';
+                    console.error('API error:', errorMsg);
+                    alert('❌ Error: ' + errorMsg);
+                }
+
+                delete window.selectedAvatarFile;
+                delete window.selectedAvatarData;
+
+            } catch (error) {
+                console.error('Exception caught:', error);
+                console.error('Error stack:', error.stack);
+                alert('❌ Error saving profile: ' + error.message);
+            }
+        }
+
+        function toggleFollow() {
+            if (!currentUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            console.log('Follow:', profileUser?.username);
+        }
+
+        function shareProfile() {
+            if (!profileUser?.username) return;
+
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('✅ Profile URL copied to clipboard!');
+            }).catch(() => {
+                alert('Profile URL: ' + url);
+            });
+        }
+
+        function playTrack(trackId) {
+            window.location.href = `index.html#track=${trackId}`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
+        }
+    </script>
+</body>
+</html>

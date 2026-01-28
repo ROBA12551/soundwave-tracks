@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="google-adsense-account" content="ca-pub-9788086433456762">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload - BeatWave</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #ff6b00;
+            --accent-color: #FFA500;
+            --dark-bg: #121212;
+            --card-bg: #1E1E1E;
+            --hover-bg: #282828;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B3B3B3;
+            --border-color: #282828;
+            --success-color: #1DB954;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: 'Rubik', sans-serif;
+        }
+
+        .page-wrapper {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(180deg, rgba(18, 18, 18, 0.95) 0%, rgba(18, 18, 18, 0.7) 100%);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .content {
+            flex: 1;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 24px;
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 32px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .upload-zone {
+            background: var(--card-bg);
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 48px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 32px;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: var(--primary-color);
+            background: var(--hover-bg);
+        }
+
+        .upload-zone-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .upload-zone-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .upload-zone-subtext {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .form-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="file"],
+        input[type="url"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'Rubik', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="file"]:focus,
+        input[type="url"]:focus,
+        textarea:focus,
+        select:focus {
+            background: var(--dark-bg);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 24px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 107, 0, 0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .error-message {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #FF4444;
+            border-radius: 6px;
+            padding: 12px;
+            color: #FF6B6B;
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(29, 185, 84, 0.1);
+            border: 1px solid var(--success-color);
+            border-radius: 6px;
+            padding: 12px;
+            color: var(--success-color);
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .file-preview {
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .file-name {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 32px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--accent-color);
+        }
+
+        .cover-upload-zone {
+            background: var(--hover-bg);
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+        }
+
+        .cover-upload-zone:hover,
+        .cover-upload-zone.dragover {
+            border-color: var(--primary-color);
+            background: var(--card-bg);
+        }
+
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .upload-zone {
+                padding: 32px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="header">
+            <a href="index.html">BeatWave</a>
+        </div>
+
+        <div class="content">
+            <a href="index.html" class="back-link">Back to home</a>
+            
+            <h1>Upload Your Track</h1>
+
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+
+            <!-- Audio Upload -->
+            <div class="form-section">
+                <div class="section-title">Audio File</div>
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-zone-icon">♪</div>
+                    <div class="upload-zone-text">Drag your audio file here</div>
+                    <div class="upload-zone-subtext">or click to browse</div>
+                    <input type="file" id="audioFile" class="file-input" accept="audio/*">
+                </div>
+                <div class="file-preview" id="audioPreview">
+                    <div style="font-size: 13px; color: var(--text-secondary);">Selected: <span class="file-name" id="audioFileName"></span></div>
+                </div>
+            </div>
+
+            <!-- Track Info -->
+            <div class="form-section">
+                <div class="section-title">Track Information</div>
+
+                <div class="form-group">
+                    <label>Track Title</label>
+                    <input type="text" id="trackTitle" placeholder="Enter track title...">
+                </div>
+
+                <div class="form-group">
+                    <label>Artist Name</label>
+                    <input type="text" id="artistName" placeholder="Your artist name...">
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="trackDescription" placeholder="Tell listeners about your track..."></textarea>
+                </div>
+
+                <div class="two-column">
+                    <div class="form-group">
+                        <label>Genre</label>
+                        <select id="trackGenre">
+                            <option value="">Select genre...</option>
+                            <option value="electronic">Electronic</option>
+                            <option value="hip-hop">Hip Hop</option>
+                            <option value="pop">Pop</option>
+                            <option value="rock">Rock</option>
+                            <option value="indie">Indie</option>
+                            <option value="ambient">Ambient</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Language</label>
+                        <select id="trackLanguage">
+                            <option value="english">English</option>
+                            <option value="spanish">Spanish</option>
+                            <option value="french">French</option>
+                            <option value="german">German</option>
+                            <option value="japanese">Japanese</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cover Art -->
+            <div class="form-section">
+                <div class="section-title">Cover Art (Optional)</div>
+                <div class="form-group">
+                    <label>Cover Image File</label>
+                    <div class="cover-upload-zone" id="coverUploadZone">
+                        <div style="font-size: 32px; margin-bottom: 8px;"></div>
+                        <div style="font-size: 14px; font-weight: 600;">Click or drag image</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">JPG, PNG (200x200px)</div>
+                        <input type="file" id="coverFile" class="file-input" accept="image/*">
+                    </div>
+                </div>
+                <div id="coverPreview" style="display: none;">
+                    <img id="coverImg" src="" alt="Cover preview" style="width: 200px; height: 200px; object-fit: cover; border-radius: 8px; border: 2px solid var(--primary-color); margin-bottom: 8px;">
+                    <div style="font-size: 12px; color: var(--text-secondary);" id="coverFileName"></div>
+                </div>
+            </div>
+
+            <!-- External Links -->
+            <div class="form-section">
+                <div class="section-title">External Link (Optional)</div>
+                <div class="form-group">
+                    <label>External URL (SoundCloud, Spotify, etc.)</label>
+                    <input type="url" id="externalUrl" placeholder="https://soundcloud.com/artist/track">
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="form-section">
+                <div class="progress-bar" id="progressBar" style="display: none;">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <button class="btn btn-primary" id="submitBtn" onclick="handleUpload()">Upload Track</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global constants
+        const API_BASE = '/.netlify/functions';
+        let currentUser = null;
+
+        console.log('API_BASE initialized:', API_BASE);
+
+        function loadUser() {
+            try {
+                const userData = localStorage.getItem('soundwave_user');
+                if (userData) {
+                    currentUser = JSON.parse(userData);
+                    document.getElementById('artistName').value = currentUser.username;
+                }
+            } catch (e) {
+                console.error('Error loading user:', e);
+            }
+        }
+
+        // Audio file handling
+        const uploadZone = document.getElementById('uploadZone');
+        const audioFile = document.getElementById('audioFile');
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                audioFile.files = e.dataTransfer.files;
+                handleAudioFileSelect(e.dataTransfer.files[0]);
+            }
+        });
+
+        uploadZone.addEventListener('click', () => audioFile.click());
+
+        audioFile.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleAudioFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleAudioFileSelect(file) {
+            const mb = (file.size / (1024 * 1024)).toFixed(2);
+            document.getElementById('audioFileName').textContent = `${file.name} (${mb} MB)`;
+            document.getElementById('audioPreview').style.display = 'block';
+        }
+
+        // Cover image file handling
+        const coverUploadZone = document.getElementById('coverUploadZone');
+        const coverFile = document.getElementById('coverFile');
+
+        coverUploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            coverUploadZone.classList.add('dragover');
+        });
+
+        coverUploadZone.addEventListener('dragleave', () => {
+            coverUploadZone.classList.remove('dragover');
+        });
+
+        coverUploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            coverUploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                coverFile.files = e.dataTransfer.files;
+                handleCoverFileSelect(e.dataTransfer.files[0]);
+            }
+        });
+
+        coverUploadZone.addEventListener('click', () => coverFile.click());
+
+        coverFile.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleCoverFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleCoverFileSelect(file) {
+            if (!file.type.startsWith('image/')) {
+                showError('❌ Please select an image file');
+                coverFile.value = '';
+                document.getElementById('coverPreview').style.display = 'none';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('coverImg').src = e.target.result;
+                document.getElementById('coverFileName').textContent = `Selected: ${file.name}`;
+                document.getElementById('coverPreview').style.display = 'block';
+                console.log('✅ Image preview loaded');
+            };
+
+            reader.onerror = function() {
+                console.error('❌ Error reading file');
+                document.getElementById('coverPreview').style.display = 'none';
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function showError(message) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => {
+                el.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const el = document.getElementById('successMessage');
+            el.textContent = message;
+            el.style.display = 'block';
+        }
+
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+        
+async function handleUpload() {
+    const title = document.getElementById('trackTitle').value.trim();
+    const artist = document.getElementById('artistName').value.trim();
+    const genre = document.getElementById('trackGenre').value.trim();
+    const description = document.getElementById('trackDescription').value.trim();
+    const language = document.getElementById('trackLanguage').value.trim();
+    const externalUrl = document.getElementById('externalUrl').value.trim();
+    const audioFile = document.getElementById('audioFile').files[0];
+    const coverFile = document.getElementById('coverFile').files[0];
+
+    // Validation
+    if (!title || !artist || !genre || !audioFile) {
+        showError('❌ Please fill required fields');
+        return;
+    }
+
+    if (coverFile && coverFile.size > 5 * 1024 * 1024) {
+        showError('❌ Cover image must be less than 5MB');
+        return;
+    }
+
+    try {
+        console.log('=== Upload Started ===');
+        document.getElementById('progressBar').style.display = 'block';
+        const progressFill = document.getElementById('progressFill');
+
+        // Step 1: Upload audio
+        console.log('📤 Uploading audio...');
+        progressFill.style.width = '25%';
+
+        const audioFormData = new FormData();
+        audioFormData.append('file', audioFile);
+        audioFormData.append('type', 'audio');
+
+        const audioResp = await fetch('/.netlify/functions/upload-file', {
+            method: 'POST',
+            body: audioFormData
+        });
+
+        const audioData = await audioResp.json();
+        if (!audioData.success) {
+            showError('❌ Audio upload failed: ' + audioData.error);
+            document.getElementById('progressBar').style.display = 'none';
+            return;
+        }
+
+        console.log('✅ Audio uploaded');
+        progressFill.style.width = '50%';
+
+        // Step 2: Upload cover if provided
+        let coverUrl = '';
+        if (coverFile) {
+            console.log('📸 Uploading cover...');
+            const coverFormData = new FormData();
+            coverFormData.append('file', coverFile);
+            coverFormData.append('type', 'cover');
+
+            const coverResp = await fetch('/.netlify/functions/upload-file', {
+                method: 'POST',
+                body: coverFormData
+            });
+
+            const coverData = await coverResp.json();
+            if (coverData.success) {
+                coverUrl = coverData.url;
+                console.log('✅ Cover uploaded');
+            }
+        }
+
+        progressFill.style.width = '75%';
+
+        // Step 3: Save metadata
+        console.log('💾 Saving metadata...');
+
+        const metadata = {
+            title,
+            artist: currentUser?.username || artist,
+            genre,
+            description,
+            language,
+            audioUrl: audioData.url,
+            coverUrl: coverUrl,
+            externalUrl,
+            createdAt: new Date().toISOString(),
+            plays: 0,
+            likes: 0,
+            comments: 0
+        };
+
+        const metaResp = await fetch('/.netlify/functions/save-track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(metadata)
+        });
+
+        const metaData = await metaResp.json();
+
+        if (metaResp.ok && metaData.success) {
+            progressFill.style.width = '100%';
+            console.log('✅ Track uploaded:', metaData.trackId);
+            showSuccess('✅ Track uploaded successfully!');
+
+            setTimeout(() => {
+                // Clear form
+                document.getElementById('trackTitle').value = '';
+                document.getElementById('artistName').value = currentUser?.username || '';
+                document.getElementById('trackGenre').value = '';
+                document.getElementById('trackDescription').value = '';
+                document.getElementById('audioFile').value = '';
+                document.getElementById('coverFile').value = '';
+                document.getElementById('audioPreview').style.display = 'none';
+                document.getElementById('coverPreview').style.display = 'none';
+                document.getElementById('progressBar').style.display = 'none';
+                
+                // Redirect home
+                window.location.href = '/';
+            }, 2000);
+        } else {
+            showError('❌ ' + (metaData.error || 'Failed to save track'));
+            document.getElementById('progressBar').style.display = 'none';
+        }
+
+    } catch (error) {
+        console.error('❌ Error:', error);
+        showError('❌ ' + error.message);
+        document.getElementById('progressBar').style.display = 'none';
+    }
+}
+        loadUser();
+    </script>
+</body>
+</html>
