@@ -1,11 +1,13 @@
 /**
- * BeatWave App - Complete Integration v3
- * Features: tracks, playback, likes, search, profiles, verified badges, stats
+ * BeatWave App v4 - Optimized for Speed
+ * Fast loading, caching, lazy loading
  */
 
 // ===== CONFIG & STATE =====
 const API_BASE = '/.netlify/functions';
 const STORAGE_PREFIX = 'soundwave_';
+const CACHE_KEY = STORAGE_PREFIX + 'tracksCache';
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 let currentUser = null;
 let currentAudio = null;
@@ -18,48 +20,27 @@ let likedTracks = new Set();
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Initializing BeatWave...');
     
-    await waitForModule();
-    
     loadUserFromStorage();
     loadLikesFromStorage();
-    
-    await loadAllTracks();
-    
     setupEventListeners();
     updateUIForUser();
     
-    console.log('✅ BeatWave initialized');
+    // ★ 非同期で読み込み（ページをブロックしない）
+    console.log('⚡ Loading tracks asynchronously...');
+    loadAllTracksAsync();
+    
+    console.log('✅ BeatWave UI ready');
 });
-
-async function waitForModule() {
-    return new Promise((resolve) => {
-        let attempts = 0;
-        const interval = setInterval(() => {
-            if (typeof beatWaveModule !== 'undefined') {
-                clearInterval(interval);
-                resolve();
-            }
-            attempts++;
-            if (attempts > 50) {
-                clearInterval(interval);
-                resolve();
-            }
-        }, 100);
-    });
-}
 
 function loadUserFromStorage() {
     const saved = localStorage.getItem(STORAGE_PREFIX + 'user');
     if (saved) {
         try {
             currentUser = JSON.parse(saved);
-            console.log('✅ User loaded:', currentUser.username);
         } catch (e) {
             console.error('Error parsing user:', e);
             currentUser = null;
         }
-    } else {
-        currentUser = null;
     }
 }
 
@@ -74,12 +55,28 @@ function loadLikesFromStorage() {
     }
 }
 
-// ===== TRACK LOADING =====
+// ===== TRACK LOADING (OPTIMIZED) =====
 
-async function loadAllTracks() {
+/**
+ * ★ 非同期で段階的に読み込み
+ */
+async function loadAllTracksAsync() {
     try {
-        console.log('📥 Loading tracks...');
-        const response = await fetch(`${API_BASE}/tracks`);
+        // 1️⃣ キャッシュを確認
+        const cached = getTracksFromCache();
+        if (cached) {
+            console.log('💾 Using cached tracks:', cached.length);
+            allTracks = cached;
+            playlist = allTracks;
+            displayTracksProgressively();
+            return;
+        }
+
+        // 2️⃣ API から取得
+        console.log('📥 Fetching tracks from API...');
+        const response = await fetch(`${API_BASE}/tracks`, {
+            signal: AbortSignal.timeout(10000) // 10秒でタイムアウト
+        });
         
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
@@ -89,20 +86,97 @@ async function loadAllTracks() {
 
         console.log(`✅ Loaded ${allTracks.length} tracks`);
 
-        if (allTracks.length === 0) {
-            console.warn('⚠️ No tracks, using demo data');
-            allTracks = createDemoTracks();
-        }
+        // 3️⃣ キャッシュに保存
+        cacheTracksData(allTracks);
 
-        displayFeaturedTrack();
-        displayRealtimeTracks();
-        displayRecommendedTracks();
-        displayUploadedTracks();
-        displayTrendingTracks();
+        // 4️⃣ UI に表示
+        displayTracksProgressively();
+
     } catch (e) {
         console.error('❌ Error loading tracks:', e);
-        allTracks = createDemoTracks();
+        
+        // フォールバック: キャッシュを試す
+        const cached = getTracksFromCache(true); // 古いキャッシュを使用
+        if (cached) {
+            allTracks = cached;
+            displayTracksProgressively();
+        } else {
+            allTracks = createDemoTracks();
+            displayTracksProgressively();
+        }
     }
+}
+
+/**
+ * ★ トラックをキャッシュに保存
+ */
+function cacheTracksData(tracks) {
+    try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+            data: tracks,
+            timestamp: Date.now()
+        }));
+    } catch (e) {
+        console.warn('Failed to cache tracks:', e);
+    }
+}
+
+/**
+ * ★ キャッシュからトラックを取得
+ */
+function getTracksFromCache(ignoreExpiry = false) {
+    try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (!cached) return null;
+
+        const { data, timestamp } = JSON.parse(cached);
+        
+        // キャッシュの有効期限を確認
+        if (!ignoreExpiry && Date.now() - timestamp > CACHE_TTL) {
+            console.log('💾 Cache expired');
+            return null;
+        }
+
+        return data;
+    } catch (e) {
+        console.warn('Failed to read cache:', e);
+        return null;
+    }
+}
+
+/**
+ * ★ 段階的に表示（遅延レンダリング）
+ */
+function displayTracksProgressively() {
+    // 優先度: Featured > Realtime > Recommended > Uploaded > Trending
+    
+    // 1️⃣ Featured（すぐに表示）
+    console.log('📊 Rendering featured track...');
+    displayFeaturedTrack();
+    
+    // 2️⃣ Realtime（100ms後）
+    setTimeout(() => {
+        console.log('📊 Rendering realtime tracks...');
+        displayRealtimeTracks();
+    }, 100);
+    
+    // 3️⃣ Recommended（200ms後）
+    setTimeout(() => {
+        console.log('📊 Rendering recommended tracks...');
+        displayRecommendedTracks();
+    }, 200);
+    
+    // 4️⃣ Uploaded（300ms後）
+    setTimeout(() => {
+        console.log('📊 Rendering uploaded tracks...');
+        displayUploadedTracks();
+    }, 300);
+    
+    // 5️⃣ Trending（400ms後）
+    setTimeout(() => {
+        console.log('📊 Rendering trending tracks...');
+        displayTrendingTracks();
+    }, 400);
 }
 
 function createDemoTracks() {
@@ -144,7 +218,7 @@ function displayFeaturedTrack() {
     container.innerHTML = `
         <div class="featured-track">
             <div class="featured-cover">
-                ${featured.coverUrl ? `<img src="${featured.coverUrl}" style="width: 100%; height: 100%; object-fit: cover;">` : '🎵'}
+                ${featured.coverUrl ? `<img src="${featured.coverUrl}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">` : '🎵'}
             </div>
             <div>
                 <h2 class="featured-info" style="font-size: 32px; font-weight: 900; margin-bottom: 8px;">
@@ -197,7 +271,7 @@ function displayRealtimeTracks() {
         html += `
             <div class="track-list-item" onclick="playTrack('${track.id}')">
                 <div class="track-list-cover">
-                    ${track.coverUrl ? `<img src="${track.coverUrl}" style="width: 100%; height: 100%; object-fit: cover;">` : '🎵'}
+                    ${track.coverUrl ? `<img src="${track.coverUrl}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">` : '🎵'}
                 </div>
                 <div class="track-list-info">
                     <div class="track-list-title">${escapeHtml(track.title || 'Untitled')}</div>
@@ -237,7 +311,7 @@ function displayRecommendedTracks() {
         html += `
             <div class="track-card" onclick="playTrack('${track.id}')">
                 <div class="track-cover">
-                    ${track.coverUrl ? `<img src="${track.coverUrl}" style="width: 100%; height: 100%; object-fit: cover;">` : '🎵'}
+                    ${track.coverUrl ? `<img src="${track.coverUrl}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">` : '🎵'}
                 </div>
                 <div class="track-info">
                     <h3>${escapeHtml(track.title || 'Untitled')} ${verifiedBadge}</h3>
@@ -271,7 +345,7 @@ function displayUploadedTracks() {
         html += `
             <div class="track-card" onclick="playTrack('${track.id}')">
                 <div class="track-cover">
-                    ${track.coverUrl ? `<img src="${track.coverUrl}" style="width: 100%; height: 100%; object-fit: cover;">` : '🎵'}
+                    ${track.coverUrl ? `<img src="${track.coverUrl}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">` : '🎵'}
                 </div>
                 <div class="track-info">
                     <h3>${escapeHtml(track.title || 'Untitled')} ${verifiedBadge}</h3>
@@ -305,7 +379,7 @@ function displayTrendingTracks() {
         html += `
             <div class="track-list-item" onclick="playTrack('${track.id}')">
                 <div class="track-list-cover">
-                    ${track.coverUrl ? `<img src="${track.coverUrl}" style="width: 100%; height: 100%; object-fit: cover;">` : '🎵'}
+                    ${track.coverUrl ? `<img src="${track.coverUrl}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">` : '🎵'}
                 </div>
                 <div class="track-list-info">
                     <div class="track-list-title">${escapeHtml(track.title || 'Untitled')} ${verifiedBadge}</div>
@@ -343,7 +417,7 @@ function displayLikedTracks() {
         html += `
             <div class="track-list-item" onclick="playTrack('${track.id}')">
                 <div class="track-list-cover">
-                    ${track.coverUrl ? `<img src="${track.coverUrl}" style="width: 100%; height: 100%; object-fit: cover;">` : '🎵'}
+                    ${track.coverUrl ? `<img src="${track.coverUrl}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">` : '🎵'}
                 </div>
                 <div class="track-list-info">
                     <div class="track-list-title">${escapeHtml(track.title || 'Untitled')} ${verifiedBadge}</div>
@@ -365,12 +439,7 @@ function displayHistoryTracks() {
     const container = document.getElementById('historyTracks');
     if (!container) return;
 
-    let history = [];
-    if (typeof beatWaveModule !== 'undefined' && beatWaveModule.getHistory) {
-        history = beatWaveModule.getHistory(50);
-    } else {
-        history = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'history') || '[]');
-    }
+    let history = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'history') || '[]');
 
     if (history.length === 0) {
         container.innerHTML = '<p style="color: var(--text-secondary);">No history yet</p>';
@@ -412,7 +481,6 @@ async function playTrack(trackId) {
         return;
     }
 
-    // ★ 再生回数を増やす
     console.log('▶️ Playing track:', trackId);
     await incrementPlayCount(trackId);
 
@@ -481,13 +549,7 @@ function togglePlay() {
 }
 
 function playPrevious() {
-    let history = [];
-    if (typeof beatWaveModule !== 'undefined' && beatWaveModule.getHistory) {
-        history = beatWaveModule.getHistory(2);
-    } else {
-        history = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'history') || '[]');
-    }
-    
+    let history = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'history') || '[]');
     if (history.length >= 2) {
         playTrack(history[1].id);
     }
@@ -502,38 +564,21 @@ function playNext() {
 
 // ===== STATS MANAGEMENT =====
 
-/**
- * ★ 再生回数を増やす（メイン）
- */
 async function incrementPlayCount(trackId) {
     try {
         const track = allTracks.find(t => t.id === trackId);
         if (!track) return;
 
-        console.log('📊 Incrementing play count for:', trackId);
-
-        // ローカル更新
         track.plays = (track.plays || 0) + 1;
-
-        // UI 更新
         updateAllTrackDisplays();
-
-        // GitHub に保存
         await saveTracksToGitHub();
-
-        console.log('✅ Play count incremented:', track.plays);
     } catch (error) {
         console.error('❌ Error incrementing play count:', error);
     }
 }
 
-/**
- * ★ GitHub にトラックデータを保存
- */
 async function saveTracksToGitHub() {
     try {
-        console.log('💾 Saving tracks to GitHub...');
-
         const response = await fetch(`${API_BASE}/tracks`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -548,8 +593,7 @@ async function saveTracksToGitHub() {
             return false;
         }
 
-        const data = await response.json();
-        console.log('✅ Tracks saved to GitHub:', data);
+        cacheTracksData(allTracks);
         return true;
     } catch (error) {
         console.error('❌ Error saving to GitHub:', error);
@@ -557,9 +601,6 @@ async function saveTracksToGitHub() {
     }
 }
 
-/**
- * ★ すべてのトラック表示を更新
- */
 function updateAllTrackDisplays() {
     displayFeaturedTrack();
     displayRealtimeTracks();
@@ -582,28 +623,16 @@ async function likeTrack(trackId) {
     const isLiked = likedTracks.has(trackId);
     const newLiked = !isLiked;
 
-    // ★ ローカル更新
     if (newLiked) {
         likedTracks.add(trackId);
         track.likes = (track.likes || 0) + 1;
-        console.log('❤️ Liked:', trackId);
     } else {
         likedTracks.delete(trackId);
         track.likes = Math.max(0, (track.likes || 1) - 1);
-        console.log('💔 Unliked:', trackId);
     }
     
-    // ★ localStorage に保存
     localStorage.setItem(STORAGE_PREFIX + 'likedTracks', JSON.stringify(Array.from(likedTracks)));
-    
-    if (typeof beatWaveModule !== 'undefined') {
-        beatWaveModule.userLikes = likedTracks;
-    }
-
-    // ★ GitHub に保存
     await saveTracksToGitHub();
-
-    // ★ UI を更新
     updateAllTrackDisplays();
 }
 
@@ -649,7 +678,7 @@ function showSearchResults(query, results) {
             <div style="background: var(--card-bg); border-bottom: 1px solid var(--border-color); padding: 16px 24px; position: sticky; top: 0; display: flex; align-items: center; gap: 12px;">
                 <button onclick="closeSearchResults()" style="background: none; border: none; color: var(--text-primary); font-size: 20px; cursor: pointer;">← Back</button>
                 <div style="flex: 1; font-size: 14px; color: var(--text-secondary);">
-                    ${results.length} results for "${escapeHtml(query)}"
+                    ${results.length} results
                 </div>
             </div>
             <div style="padding: 24px; flex: 1;">
@@ -660,23 +689,19 @@ function showSearchResults(query, results) {
     } else {
         results.forEach(track => {
             const isLiked = likedTracks.has(track.id);
-            const verifiedBadge = track.verified ? '<span class="verified-badge" style="font-size: 12px; margin-left: 4px;">✓</span>' : '';
+            const verifiedBadge = track.verified ? '<span class="verified-badge">✓</span>' : '';
             html += `
                 <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'" onclick="playTrack('${track.id}')">
                     <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #ff6b00 0%, #FFA500 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; overflow: hidden;">
-                        ${track.coverUrl ? `<img src="${track.coverUrl}" alt="${track.title}" style="width: 100%; height: 100%; object-fit: cover;">` : '🎵'}
+                        ${track.coverUrl ? `<img src="${track.coverUrl}" alt="${track.title}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">` : '🎵'}
                     </div>
                     <div style="flex: 1; min-width: 0;">
                         <div style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            ${escapeHtml(track.title || 'Untitled')}
-                            ${verifiedBadge}
+                            ${escapeHtml(track.title || 'Untitled')} ${verifiedBadge}
                         </div>
                         <div style="font-size: 13px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;" onclick="event.stopPropagation(); openUserProfile('${escapeHtml(track.artist)}')">
                             ${escapeHtml(track.artist || 'Unknown')}
                         </div>
-                    </div>
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-right: 12px;">
-                        ${formatNumber(track.plays || 0)} plays
                     </div>
                     <div onclick="event.stopPropagation(); likeTrack('${track.id}')" style="font-size: 18px; cursor: pointer;">
                         ${isLiked ? '❤️' : '🤍'}
@@ -693,9 +718,7 @@ function showSearchResults(query, results) {
 
 function closeSearchResults() {
     const overlay = document.getElementById('searchOverlay');
-    if (overlay) {
-        overlay.style.display = 'none';
-    }
+    if (overlay) overlay.style.display = 'none';
 }
 
 // ===== USER PROFILE =====
@@ -706,8 +729,6 @@ function openUserProfile(username) {
         return;
     }
 
-    console.log('Opening profile for:', username);
-    
     let modal = document.getElementById('profileModal');
     if (!modal) {
         modal = document.createElement('div');
@@ -796,9 +817,7 @@ function initializeSidebar() {
             item.classList.add('active');
             
             const view = item.getAttribute('data-view');
-            if (view) {
-                switchView(view);
-            }
+            if (view) switchView(view);
         });
     });
 }
@@ -807,9 +826,7 @@ function switchView(viewName) {
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
     
     const view = document.getElementById(viewName + 'View');
-    if (view) {
-        view.style.display = 'block';
-    }
+    if (view) view.style.display = 'block';
 
     switch(viewName) {
         case 'home':
@@ -830,19 +847,13 @@ function switchView(viewName) {
 
 function initializePlayer() {
     const playBtn = document.getElementById('playBtn');
-    if (playBtn) {
-        playBtn.addEventListener('click', togglePlay);
-    }
+    if (playBtn) playBtn.addEventListener('click', togglePlay);
 
     const prevBtn = document.getElementById('prevBtn');
-    if (prevBtn) {
-        prevBtn.addEventListener('click', playPrevious);
-    }
+    if (prevBtn) prevBtn.addEventListener('click', playPrevious);
 
     const nextBtn = document.getElementById('nextBtn');
-    if (nextBtn) {
-        nextBtn.addEventListener('click', playNext);
-    }
+    if (nextBtn) nextBtn.addEventListener('click', playNext);
 
     const progressBar = document.getElementById('playerProgress');
     if (progressBar) {
@@ -863,28 +874,23 @@ function updateUIForUser() {
     const userBtn = document.getElementById('userBtn');
     const logoutBtn = document.getElementById('logoutBtn');
 
-    console.log('🔄 Updating UI. currentUser:', currentUser ? currentUser.username : 'null');
-
     if (currentUser) {
         if (loginBtn) loginBtn.style.display = 'none';
         if (uploadBtn) uploadBtn.style.display = 'block';
         if (userBtn) {
             userBtn.style.display = 'block';
             userBtn.textContent = currentUser.username[0].toUpperCase();
-            userBtn.title = currentUser.username;
             userBtn.onclick = openCurrentUserProfile;
         }
         if (logoutBtn) logoutBtn.style.display = 'block';
-        console.log('✅ UI updated to logged-in state');
     } else {
         if (loginBtn) {
             loginBtn.style.display = 'block';
-            console.log('✅ Login button shown');
+            loginBtn.onclick = () => openModal('loginModal');
         }
         if (uploadBtn) uploadBtn.style.display = 'none';
         if (userBtn) userBtn.style.display = 'none';
         if (logoutBtn) logoutBtn.style.display = 'none';
-        console.log('✅ UI updated to logged-out state');
     }
 }
 
@@ -892,13 +898,7 @@ function updateUIForUser() {
 
 function escapeHtml(text) {
     if (!text) return '';
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    };
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
     return String(text).replace(/[&<>"']/g, m => map[m]);
 }
 
@@ -915,12 +915,6 @@ function formatNumber(num) {
     return num.toString();
 }
 
-// ===== STORAGE HELPER =====
-
-function saveToStorage(key, value) {
-    localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
-}
-
 // ===== EVENT LISTENERS =====
 
 function setupEventListeners() {
@@ -932,10 +926,6 @@ function setupEventListeners() {
     const uploadBtn = document.getElementById('uploadBtn');
     const logoutBtn = document.getElementById('logoutBtn');
     const homeLink = document.getElementById('homeLink');
-
-    if (loginBtn) {
-        loginBtn.addEventListener('click', () => openModal('loginModal'));
-    }
 
     if (uploadBtn) {
         uploadBtn.addEventListener('click', () => {
@@ -950,7 +940,6 @@ function setupEventListeners() {
 
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-            console.log('🚪 Logout clicked');
             currentUser = null;
             localStorage.removeItem(STORAGE_PREFIX + 'user');
             updateUIForUser();
@@ -959,9 +948,7 @@ function setupEventListeners() {
     }
 
     if (homeLink) {
-        homeLink.addEventListener('click', () => {
-            switchView('home');
-        });
+        homeLink.addEventListener('click', () => switchView('home'));
     }
 }
 
@@ -969,16 +956,12 @@ function setupEventListeners() {
 
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.add('active');
-    }
+    if (modal) modal.classList.add('active');
 }
 
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.remove('active');
-    }
+    if (modal) modal.classList.remove('active');
 }
 
 // ===== EXPORT TO GLOBAL =====
