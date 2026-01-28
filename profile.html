@@ -538,9 +538,39 @@
 
         /* Responsive */
         @media (max-width: 768px) {
+            .header {
+                padding: 12px 16px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .logo {
+                font-size: 16px;
+            }
+
+            .logo-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 14px;
+            }
+
+            .header-right {
+                gap: 8px;
+            }
+
+            .profile-header {
+                height: 200px;
+            }
+
+            .profile-cover {
+                height: 100%;
+            }
+
             .profile-content {
                 flex-direction: column;
                 align-items: flex-start;
+                padding: 20px 16px 16px;
+                gap: 12px;
             }
 
             .profile-avatar {
@@ -549,8 +579,29 @@
                 font-size: 40px;
             }
 
+            .profile-info {
+                padding-bottom: 0;
+                width: 100%;
+            }
+
+            .profile-name {
+                font-size: 24px;
+            }
+
+            .profile-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+                padding: 16px;
+            }
+
             .main-content {
                 flex-direction: column;
+                gap: 16px;
+                padding: 16px;
+            }
+
+            .tracks-section {
+                width: 100%;
             }
 
             .sidebar {
@@ -558,7 +609,182 @@
             }
 
             .tracks-grid {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 12px;
+            }
+
+            .section-title {
+                font-size: 16px;
+            }
+        }
+
+        /* ★ 超小型モバイル（360px以下） */
+        @media (max-width: 480px) {
+            body {
+                font-size: 14px;
+            }
+
+            .header {
+                padding: 8px 12px;
+            }
+
+            .logo {
+                font-size: 14px;
+            }
+
+            .logo-icon {
+                width: 24px;
+                height: 24px;
+                font-size: 12px;
+            }
+
+            .nav-link {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .user-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+
+            .profile-header {
+                height: 150px;
+            }
+
+            .profile-avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 32px;
+                border: 3px solid var(--dark-bg);
+            }
+
+            .profile-name {
+                font-size: 20px;
+                margin-bottom: 4px;
+            }
+
+            .profile-location {
+                font-size: 12px;
+                margin-bottom: 8px;
+            }
+
+            .profile-description {
+                font-size: 12px;
+            }
+
+            .profile-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+                padding: 12px;
+            }
+
+            .stat-value {
+                font-size: 18px;
+            }
+
+            .stat-label {
+                font-size: 10px;
+            }
+
+            .main-content {
+                padding: 12px;
+                gap: 12px;
+            }
+
+            .tracks-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                gap: 8px;
+            }
+
+            .track-card {
+                padding: 8px;
+            }
+
+            .track-info h3 {
+                font-size: 11px;
+            }
+
+            .track-info p {
+                font-size: 10px;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 12px;
+                margin-bottom: 6px;
+            }
+
+            .sidebar-card {
+                padding: 16px;
+                margin-bottom: 12px;
+            }
+
+            .modal-content {
+                padding: 16px;
+                width: 95%;
+            }
+
+            .modal-title {
+                font-size: 18px;
+                margin-bottom: 16px;
+            }
+
+            .form-group {
+                margin-bottom: 12px;
+            }
+
+            .form-group label {
+                font-size: 11px;
+                margin-bottom: 6px;
+            }
+
+            .form-group input,
+            .form-group textarea {
+                padding: 8px;
+                font-size: 12px;
+            }
+
+            .avatar-upload-wrapper {
+                gap: 12px;
+            }
+
+            .avatar-preview {
+                width: 80px;
+                height: 80px;
+                font-size: 32px;
+            }
+
+            .avatar-upload-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+        }
+
+        /* ★ iPhone SE サイズ以下（375px） */
+        @media (max-width: 375px) {
+            .profile-avatar {
+                width: 70px;
+                height: 70px;
+                font-size: 28px;
+            }
+
+            .profile-name {
+                font-size: 18px;
+            }
+
+            .profile-stats {
+                gap: 6px;
+                padding: 10px;
+            }
+
+            .tracks-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .track-cover {
+                aspect-ratio: 1;
             }
         }
     </style>
@@ -584,12 +810,12 @@
             <div class="profile-avatar" id="profileAvatar">S</div>
             <div class="profile-info">
                 <div class="profile-name">
-                    <span id="profileName">user</span>
+                    <span id="profileName">Syensan/学先生</span>
                     <div class="verified-badge" id="verifiedBadge" style="display: none;"></div>
                 </div>
-                <div class="profile-location" id="profileLocation">...</div>
+                <div class="profile-location" id="profileLocation">🇯🇵 Japan</div>
                 <div class="profile-description" id="profileDescription">
-                   ...
+                    Music artist | 音楽を愛する | Independent producer
                 </div>
             </div>
         </div>
@@ -627,7 +853,7 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-card">
-                <button class="btn btn-primary" id="editProfileBtn">Edit Profile</button>
+                <button class="btn btn-primary" id="editProfileBtn">✏️ Edit Profile</button>
                 <button class="btn btn-secondary" id="shareProfileBtn">Share</button>
             </div>
 
@@ -650,9 +876,9 @@
             <div class="form-group">
                 <label>Avatar Image</label>
                 <div class="avatar-upload-wrapper">
-                    <div class="avatar-preview" id="avatarPreview"></div>
+                    <div class="avatar-preview" id="avatarPreview">👤</div>
                     <div style="flex: 1;">
-                        <input type="file" id="avatarUpload" class="avatar-upload-input" accept="image/*">
+                        <input type="file" id="avatarUpload" class="avatar-upload-input" accept="image/*" onchange="handleAvatarUpload(event)">
                         <input type="hidden" id="avatarBase64" value="">
                         <button type="button" class="avatar-upload-btn" onclick="document.getElementById('avatarUpload').click()">
                             📸 Upload Image
